@@ -94,7 +94,7 @@ pub fn metadata_2(c: &mut Criterion) {
         c,
         BenchmarkOptions {
             query_string: "$..search_metadata.count",
-            jsonski_query_string: "",
+            jsonski_query_string: "$.search_metadata.count",
             id: "metadata_2",
             warm_up_time: Duration::from_secs(10),
             measurement_time: Duration::from_secs(40),
@@ -106,7 +106,7 @@ pub fn metadata_3(c: &mut Criterion) {
         c,
         BenchmarkOptions {
             query_string: "$..count",
-            jsonski_query_string: "",
+            jsonski_query_string: "$.search_metadata.count",
             id: "metadata_3",
             warm_up_time: Duration::from_secs(10),
             measurement_time: Duration::from_secs(40),

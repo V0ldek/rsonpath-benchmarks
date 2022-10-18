@@ -6,6 +6,7 @@ use rsonpath::query::JsonPathQuery;
 use rsonpath::stackless::StacklessRunner;
 use rsonpath_benchmarks::rust_jsurfer;
 use rsonpath_benchmarks::rust_jsonski;
+use jq_rs::compile as jq_compile;
 
 use std::fs;
 
@@ -27,6 +28,7 @@ fn get_contents(test_path: &str) -> Input {
 struct BenchmarkOptions<'a> {
     pub query_string: &'a str,
     pub jsonski_query_string: &'a str,
+    pub jq_query_string: &'a str,
     pub id: &'a str,
     pub warm_up_time: Duration,
     pub measurement_time: Duration,
@@ -51,7 +53,6 @@ fn ast(c: &mut Criterion, options: BenchmarkOptions<'_>) {
     group.throughput(criterion::Throughput::BytesDecimal(contents.len() as u64));
 
     let rsonpath = StacklessRunner::compile_query(&query);
-
     group.bench_with_input(
         BenchmarkId::new("rsonpath", options.query_string),
         &contents,
@@ -75,6 +76,15 @@ fn ast(c: &mut Criterion, options: BenchmarkOptions<'_>) {
             },
         );
     }
+    if !options.jq_query_string.is_empty(){
+        let mut jqc = jq_compile(options.jq_query_string).unwrap();
+        let cont = fs::read_to_string(get_path(AST_DATA_PATH)).unwrap();
+        group.bench_with_input(
+            BenchmarkId::new("jq", options.jq_query_string),
+            &cont,
+                | b, c| b.iter(||jqc.run(c).unwrap()),
+        );   
+    }
     group.finish();
 }
 pub fn decl_name(c: &mut Criterion) {
@@ -83,6 +93,7 @@ pub fn decl_name(c: &mut Criterion) {
         BenchmarkOptions {
             query_string: "$..decl.name",
             jsonski_query_string: "",
+            jq_query_string: "[.. | .decl? | select( . != null) | .name] | length",
             id: "decl_name",
             warm_up_time: Duration::from_secs(10),
             measurement_time: Duration::from_secs(40),
@@ -94,7 +105,8 @@ pub fn included_from(c: &mut Criterion) {
         c,
         BenchmarkOptions {
             query_string: "$..loc.includedFrom.file",
-            jsonski_query_string: "",
+            jsonski_query_string: "[.. | loc? | select(. != null) | .includedFrom.file ] | length",
+            jq_query_string: "",
             id: "includedFrom",
             warm_up_time: Duration::from_secs(10),
             measurement_time: Duration::from_secs(40),
@@ -108,6 +120,7 @@ pub fn nested_inner(c: &mut Criterion) {
         BenchmarkOptions {
             query_string: "$..inner..inner..type.qualType",
             jsonski_query_string: "",
+            jq_query_string: "",
             id: "includedFrom",
             warm_up_time: Duration::from_secs(10),
             measurement_time: Duration::from_secs(40),
