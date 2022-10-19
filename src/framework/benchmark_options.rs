@@ -4,7 +4,8 @@ use criterion::{BenchmarkGroup, measurement::Measurement};
 
 pub(crate) struct BenchmarkOptions {
     pub(crate) warm_up_time: Option<Duration>,
-    pub(crate) measurement_time: Option<Duration>   
+    pub(crate) measurement_time: Option<Duration>,
+    pub(crate) sample_count: Option<usize>
 }
 
 impl BenchmarkOptions {
@@ -14,6 +15,9 @@ impl BenchmarkOptions {
         }
         if let Some(duration) = self.measurement_time {
             group.measurement_time(duration);
+        }
+        if let Some(sample_count) = self.sample_count{
+            group.sample_size(sample_count);
         }
     }
 }
