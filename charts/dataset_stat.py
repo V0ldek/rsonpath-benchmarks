@@ -23,8 +23,6 @@ def density(tree):
         L = tree.values()
     return sum(density(e) for e in L) + 1
     
-datapath = pathlib.Path(rootpath, "data")
-it = os.walk(datapath)
 print("file", "size", "depth", "verbosity", sep="\t")
 dataset = {}
 for p in get_dataset(): 

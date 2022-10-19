@@ -25,6 +25,8 @@ On x86_64 Ubuntu the latters can be done by installing `openjdk-17-jdk` and expo
 
 On linux system with `wget` installed run the script `sh dl.sh`. Otherwise you can download manually the dataset and put them in the correct folder.
 
+For more information, refers to:
+
 * Crossref: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7225594.svg)](https://doi.org/10.5281/zenodo.7225594)
 * Twitter: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7225577.svg)](https://doi.org/10.5281/zenodo.7225577)
 * AST: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7225575.svg)](https://doi.org/10.5281/zenodo.7225575)
@@ -70,3 +72,45 @@ You can compare the SIMD and no-SIMD versions by disabling the default `simd` fe
 ```bash
 cargo bench --bench <dataset> --no-default-features
 ```
+
+The folder `target/criterion` contains all the information needed to plot the experiment.
+
+## Plotting
+
+To plot the result once the bench done.
+
+```bash
+python3 charts/charts.py
+```
+
+You can also provide a path to a `criterion` folder:
+
+```bash
+python3 charts/charts.py exps/chetemi
+```
+
+The plot will be saved in the `plot.png` file of the current directory. (I know, it could be better).
+
+## Statistics
+
+Two statistics scripts are available:
+
+* One about the dataset: 
+
+```python
+python3 charts/dataset_stat.py
+```
+
+It will plot on stdout some informations about each json-file in the `data` folder. Be aware that it will
+load the file in memory, in python. Expect it to be slow and memory consumming.
+
+* About the queries
+
+```python
+python3 charts/queries_stat.py
+```
+
+This script will assume you run the benchmark (and look into the directory `target/criterion`) to extract the list
+of queries. It will then compute some parameters and the number of match with `rsonpath`. The binary of `rsonpath`
+should be in the path (run `cargo install rsonpath`).
+
