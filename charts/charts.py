@@ -13,9 +13,10 @@ from extract_info import *
 
 
 if __name__ == "__main__":
-    matplotlib.style.use("seaborn")
     plot.rcParams.update({
-        "font.size": 15
+        "font.size": 18,
+        "axes.facecolor": "whitesmoke",
+        "font.family": "serif"
     })
     path = None
     if len(sys.argv) > 1:
@@ -44,28 +45,32 @@ if __name__ == "__main__":
 
     pos = np.array(range(len(exps)))
     fig, (ax0, ax1) = plot.subplots(1, 2, gridspec_kw={'width_ratios':[1, ratio]})
-    bar = ax0.bar(exps_short, jsurfer, width=width, label="jsurfer", color="tab:gray")
-    ax0.legend(prop={"size":12})
+    ax0.grid(color = 'white', linestyle = '-', linewidth = 3, zorder=1)
+    bar = ax0.bar(exps_short, jsurfer, width=width, label="jsurfer", color="tab:gray", zorder=3)
+    ax0.legend()
+    ax0.set_xlabel("A")
     ax0.set_ylabel("GB/s")
     #ax0.bar_label(bar, [f"{e:0.2f}" for e in jsurfer])
 
     width = width/ratio
 
-    bar = ax1.bar(pos+width/2+0.05, rsonpath, label="rsonpath", width=width, color="tab:blue")
+    bar = ax1.bar(pos+width/2+0.03, rsonpath, label="rsonpath", width=width, color="tab:blue", zorder=3)
     ax1.set_xticks(pos)
     ax1.set_xticklabels(exps_short)
-    ax1.bar_label(bar, [f"x{e:0.0f}" for e in rsonpath/jsurfer])
+    ax1.bar_label(bar, [f"{e:0.0f}" for e in rsonpath/jsurfer])
     pos2, jsonski2 = zip(*filter(lambda e:e[1] > 0, zip(pos, jsonski)))
     jsonski2 = np.array(jsonski2)
     pos2 = np.array(pos2)
 
-    bar = ax1.bar(pos2-width/2-0.05, jsonski2, label="jsonski", width=width, color="tab:red")
-    ax1.bar_label(bar, [f"x{e:0.0f}" for e in filter(bool, jsonski/jsurfer)])
+    bar = ax1.bar(pos2-width/2-0.03, jsonski2, label="jsonski", width=width, color="tab:red")
+    ax1.bar_label(bar, [f"{e:0.0f}" for e in filter(bool, jsonski/jsurfer)], zorder=3)
     ax1.set_ylabel("GB/s")
-    ax0.legend(prop={"size":20})
+    ax1.grid(color = 'white', linestyle = '-', linewidth = 3, zorder=1)
+    ax1.legend()
+    ax1.set_xlabel("B")
     fig.tight_layout()
     fig.set_size_inches(20, 5)
-    plot.subplots_adjust(wspace=0.1, left=0.04)
+    plot.subplots_adjust(wspace=0.2, left=0.06)
     plot.savefig("plot.png")
     sys.exit(0)
     queries = {}
