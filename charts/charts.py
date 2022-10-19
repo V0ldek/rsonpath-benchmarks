@@ -48,7 +48,6 @@ if __name__ == "__main__":
     ax0.grid(color = 'white', linestyle = '-', linewidth = 3, zorder=1)
     bar = ax0.bar(exps_short, jsurfer, width=width, label="jsurfer", color="tab:gray", zorder=3)
     ax0.legend()
-    ax0.set_xlabel("A")
     ax0.set_ylabel("GB/s")
     #ax0.bar_label(bar, [f"{e:0.2f}" for e in jsurfer])
 
@@ -67,7 +66,6 @@ if __name__ == "__main__":
     ax1.set_ylabel("GB/s")
     ax1.grid(color = 'white', linestyle = '-', linewidth = 3, zorder=1)
     ax1.legend()
-    ax1.set_xlabel("B")
     fig.tight_layout()
     fig.set_size_inches(20, 5)
     plot.subplots_adjust(wspace=0.2, left=0.06)
