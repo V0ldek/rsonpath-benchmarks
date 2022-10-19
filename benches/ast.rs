@@ -93,7 +93,7 @@ pub fn included_from(c: &mut Criterion) {
         c,
         BenchmarkOptions {
             query_string: "$..loc.includedFrom.file",
-            jq_query_string: "",
+            jsonski_query_string: "",
             id: "includedFrom",
             warm_up_time: Duration::from_secs(10),
             measurement_time: Duration::from_secs(40),
@@ -107,7 +107,6 @@ pub fn nested_inner(c: &mut Criterion) {
         BenchmarkOptions {
             query_string: "$..inner..inner..type.qualType",
             jsonski_query_string: "",
-            jq_query_string: "",
             id: "includedFrom",
             warm_up_time: Duration::from_secs(10),
             measurement_time: Duration::from_secs(40),
