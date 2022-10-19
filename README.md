@@ -2,7 +2,6 @@
 
 Benchmark suite for [`rsonpath`](https://github.com/v0ldek/rsonpath).
 
-## Dataset
 
 | Bench name            | Path                            | Size      | Depth  | Description |
 |-----------------------|---------------------------------|-----------|--------|---|
@@ -21,6 +20,42 @@ Benchmark suite for [`rsonpath`](https://github.com/v0ldek/rsonpath).
 
 On x86_64 Ubuntu the latters can be done by installing `openjdk-17-jdk` and exporting `JAVA_HOME` as
 `/usr/lib/jvm/java-1.17.0-openjdk-amd64`.
+
+## Download the dataset
+
+On linux system with `wget` installed run the script `sh dl.sh`. Otherwise you can download manually the dataset and put them in the correct folder.
+
+* Crossref: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7225594.svg)](https://doi.org/10.5281/zenodo.7225594)
+* Twitter: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7225577.svg)](https://doi.org/10.5281/zenodo.7225577)
+* AST: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7225575.svg)](https://doi.org/10.5281/zenodo.7225575)
+
+For the benchmark to work, the directory layout should be as follows:
+
+```
+── data
+   ├── ast
+   │   └── ast.json
+   ├── crossref
+   │   ├── crossref0.json
+   │   ├── crossref16.json
+   │   ├── crossref1.json
+   │   ├── crossref2.json
+   │   ├── crossref4.json
+   │   └── crossref8.json
+   └── twitter
+       └── twitter.json
+```
+
+The md5sum of all the json file:
+
+* `./data/ast/ast.json` 1fa4d1cccd576d3b8c41ae2b3e41ea9c 
+* `./data/twitter/twitter.json` 7d3c5866a899ab6c1afb010bc31f821d 
+* `./data/crossref/crossref8.json` 65fe2be99ae61662c90dcfd160f1118b 
+* `./data/crossref/crossref16.json` dd0e20c8a420428ace481fa058954936 
+* `./data/crossref/crossref2.json` f1a859af978b668e2e2bee4bfe7c53fe 
+* `./data/crossref/crossref0.json` c6eb37d4a7eb25c05dd3e32bc7dab3db 
+* `./data/crossref/crossref1.json` 3b5e505634c36158d1ae0027f7f67d83 
+* `./data/crossref/crossref4.json` 2ec1caa9a6be75e5ba8439ebfebda22d 
 
 ## Usage
 
