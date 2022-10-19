@@ -1,9 +1,6 @@
 use crate::framework::implementation::Implementation;
 use libc::c_void;
-use std::{
-    ffi::{CString, NulError},
-    num::TryFromIntError,
-};
+use std::{ffi::{CString, NulError}, num::TryFromIntError};
 use thiserror::Error;
 
 mod jsonski_extern {
@@ -33,7 +30,7 @@ pub struct JsonSkiQuery {
 
 pub struct JsonSki {}
 
-impl Implementation<'_> for JsonSki {
+impl Implementation for JsonSki {
     type Query = JsonSkiQuery;
 
     type File = JsonSkiRecord;

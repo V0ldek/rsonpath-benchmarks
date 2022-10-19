@@ -77,6 +77,9 @@ fn ast(c: &mut Criterion, options: BenchmarkOptions<'_>) {
     }
     group.finish();
 }
+
+
+
 pub fn decl_name(c: &mut Criterion) {
     ast(
         c,
