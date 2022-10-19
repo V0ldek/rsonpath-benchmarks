@@ -29,16 +29,9 @@ commas = ["rsonpath/commas"]
 cc = "1.0"
 eyre = "0.6.8"
 
-[[bench]]
-name = "openfood"
-harness = false
 
 [[bench]]
 name = "crossref"
-harness = false
-
-[[bench]]
-name = "wikidata"
 harness = false
 
 [[bench]]

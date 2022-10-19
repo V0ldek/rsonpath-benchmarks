@@ -37,6 +37,10 @@ impl Implementation for JsonSki {
 
     type Error = JsonSkiError;
 
+    fn id() -> &'static str {
+        "jsonski"
+    }
+
     fn new() -> Result<Self, Self::Error> {
         Ok(Self {})
     }

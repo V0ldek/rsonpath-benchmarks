@@ -68,10 +68,6 @@ lazy_static! {
     static ref JVM: Jvm = Jvm::new().unwrap();
 }
 
-thread_local! {
-    static JSURFER_CONTEXT: JSurferContext<'static> = Jvm::attach().expect("JSurferContext thread-local initialisation failed");
-}
-
 pub struct Jvm(JavaVM);
 
 pub struct JSurferContext<'j> {
@@ -157,7 +153,19 @@ impl<'j> Overhead<'j> {
     }
 }
 
-pub struct JSurfer {}
+pub struct JSurfer {
+    context: JSurferContext<'static>,
+}
+
+impl JSurfer {
+    fn env(&self) -> &JNIEnv<'static> {
+        self.context.env()
+    }
+
+    fn shim(&self) -> JClass<'static> {
+        self.context.shim
+    }
+}
 
 impl Implementation for JSurfer {
     type Query = CompiledQuery<'static>;
@@ -166,79 +174,79 @@ impl Implementation for JSurfer {
 
     type Error = JSurferError;
 
+    fn id() -> &'static str {
+        "jsurfer"
+    }
+
     fn new() -> Result<Self, Self::Error> {
-        Ok(JSurfer {})
+        Ok(JSurfer {
+            context: Jvm::attach()?,
+        })
     }
 
     fn load_file(&self, path: &str) -> Result<Self::File, Self::Error> {
-        JSURFER_CONTEXT.with(|ctx| {
-            let file_string = ctx.env().new_string(path)?;
+        let file_string = self.env().new_string(path)?;
 
-            let loaded_file = ctx.env().call_static_method(
-                ctx.shim,
-                LOAD_METHOD,
-                load_file_sig(),
-                &[file_string.into()],
-            )?;
+        let loaded_file = self.env().call_static_method(
+            self.shim(),
+            LOAD_METHOD,
+            load_file_sig(),
+            &[file_string.into()],
+        )?;
 
-            Ok(LoadedFile {
-                file_object: loaded_file,
-            })
+        Ok(LoadedFile {
+            file_object: loaded_file,
         })
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
-        JSURFER_CONTEXT.with(|ctx| {
-            let query_string = ctx.env().new_string(query)?;
-            let compile_query_result = ctx.env().call_static_method(
-                ctx.shim,
-                COMPILE_METHOD,
-                compile_query_sig(),
-                &[query_string.into()],
-            )?;
+        let query_string = self.env().new_string(query)?;
+        let compile_query_result = self.env().call_static_method(
+            self.shim(),
+            COMPILE_METHOD,
+            compile_query_sig(),
+            &[query_string.into()],
+        )?;
 
-            let compiled_query_object = match compile_query_result {
-                JValue::Object(query_obj) => query_obj,
-                _ => {
-                    return Err(type_error(
-                        COMPILE_METHOD,
-                        "Object",
-                        compile_query_result.type_name(),
-                    ))
-                }
-            };
+        let compiled_query_object = match compile_query_result {
+            JValue::Object(query_obj) => query_obj,
+            _ => {
+                return Err(type_error(
+                    COMPILE_METHOD,
+                    "Object",
+                    compile_query_result.type_name(),
+                ))
+            }
+        };
 
-            Ok(CompiledQuery {
-                query_object: compiled_query_object,
-            })
+        Ok(CompiledQuery {
+            query_object: compiled_query_object,
         })
     }
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<u64, Self::Error> {
-        JSURFER_CONTEXT.with(|ctx| {
-            let result = ctx.jvm.call_method(
-                query.query_object,
-                RUN_METHOD,
-                run_sig(),
-                &[file.file_object],
-            )?;
+        let result = self.env().call_method(
+            query.query_object,
+            RUN_METHOD,
+            run_sig(),
+            &[file.file_object],
+        )?;
 
-            match result {
-                JValue::Long(res) => res
-                    .try_into()
-                    .map_err(|err| JSurferError::ResultOutOfRange {
-                        value: res,
-                        source: err,
-                    }),
-                _ => {
-                    return Err(type_error(
-                        RUN_METHOD,
-                        "Long (non-negative)",
-                        result.type_name(),
-                    ))
-                }
+        match result {
+            JValue::Long(res) => res
+                .try_into()
+                .map_err(|err| JSurferError::ResultOutOfRange {
+                    value: res,
+                    source: err,
+                }),
+            _ => {
+                return Err(type_error(
+                    RUN_METHOD,
+                    "Long (non-negative)",
+                    result.type_name(),
+                ))
             }
-        })
+        }
     }
 }
 

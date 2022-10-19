@@ -3,6 +3,8 @@ pub trait Implementation: Sized {
     type File;
     type Error: std::error::Error;
 
+    fn id() -> &'static str;
+
     fn new() -> Result<Self, Self::Error>;
 
     fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error>;

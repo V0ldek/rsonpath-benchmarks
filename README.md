@@ -19,7 +19,7 @@ Benchmark suite for [`rsonpath`](https://github.com/v0ldek/rsonpath).
 2. JDK of version at least 8 is required and your `JAVA_HOME` environment variable must be set
    to its location.
 
-On x86_64 Ubuntu the latter can be done by installing `openjdk-17-jdk` and exporting `JAVA_HOME` as
+On x86_64 Ubuntu the latters can be done by installing `openjdk-17-jdk` and exporting `JAVA_HOME` as
 `/usr/lib/jvm/java-1.17.0-openjdk-amd64`.
 
 ## Usage

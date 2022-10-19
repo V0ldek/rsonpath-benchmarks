@@ -26,6 +26,10 @@ impl Implementation for Rsonpath {
 
     type Error = RsonpathError;
 
+    fn id() -> &'static str {
+        "rsonpath"
+    }
+
     fn new() -> Result<Self, Self::Error> {
         Ok(Rsonpath {})
     }

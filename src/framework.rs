@@ -9,7 +9,10 @@ use self::implementation::prepare;
 use self::json_document::JsonDocument;
 use criterion::{Criterion, Throughput};
 use implementation::{Implementation, PreparedQuery};
-use std::path::{Path, PathBuf};
+use std::{
+    path::{Path, PathBuf},
+    time::Duration,
+};
 use thiserror::Error;
 
 pub mod benchmark_options;
@@ -31,7 +34,7 @@ pub struct Benchset {
 }
 
 pub struct ConfiguredBenchset {
-    source: Benchset
+    source: Benchset,
 }
 
 impl ConfiguredBenchset {
@@ -43,7 +46,8 @@ impl ConfiguredBenchset {
         group.throughput(Throughput::BytesDecimal(bench.json_document.size_in_bytes));
 
         for implementation in bench.implementations.iter() {
-            group.bench_function(&bench.id, |b| b.iter(move || implementation.run()));
+            let id = format!("{}_{}", &bench.id, implementation.id());
+            group.bench_function(id, |b| b.iter(move || implementation.run()));
         }
 
         group.finish();
@@ -61,11 +65,28 @@ impl Benchset {
             .ok_or_else(|| BenchmarkError::InvalidFilePath(file_path.as_ref().to_owned()))?;
         let json_document = JsonDocument::new(file_path_str.to_owned())?;
 
+        let warm_up_time = if json_document.size_in_bytes < 10_000_000 {
+            None
+        } else if json_document.size_in_bytes < 100_000_000 {
+            Some(Duration::from_secs(5))
+        } else {
+            Some(Duration::from_secs(10))
+        };
+        let measurement_time = if json_document.size_in_bytes < 1_000_000 {
+            None
+        } else if json_document.size_in_bytes < 10_000_000 {
+            Some(Duration::from_secs(10))
+        } else if json_document.size_in_bytes < 100_000_000 {
+            Some(Duration::from_secs(25))
+        } else  {
+            Some(Duration::from_secs(45))
+        };
+
         Ok(Self {
             id: id.into(),
             options: BenchmarkOptions {
-                warm_up_time: None,
-                measurement_time: None,
+                warm_up_time,
+                measurement_time,
             },
             json_document,
             implementations: vec![],
@@ -76,6 +97,17 @@ impl Benchset {
         let bench_fn = target.to_bench_fn(&self.json_document.file_path)?;
         self.implementations.push(bench_fn);
         Ok(self)
+    }
+
+    pub fn add_all_targets_except_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {
+        self.add_target(BenchTarget::Rsonpath(query))?
+            .add_target(BenchTarget::JSurfer(query))
+    }
+
+    pub fn add_all_targets(self, query: &str) -> Result<Self, BenchmarkError> {
+        self.add_target(BenchTarget::Rsonpath(query))?
+            .add_target(BenchTarget::JsonSki(query))?
+            .add_target(BenchTarget::JSurfer(query))
     }
 
     pub fn finish(self) -> ConfiguredBenchset {
@@ -110,10 +142,16 @@ impl<'a> Target for BenchTarget<'a> {
 }
 
 trait BenchFn {
+    fn id(&self) -> &str;
+
     fn run(&self) -> u64;
 }
 
 impl<I: Implementation> BenchFn for PreparedQuery<I> {
+    fn id(&self) -> &str {
+        I::id()
+    }
+
     fn run(&self) -> u64 {
         self.implementation.run(&self.query, &self.file).unwrap()
     }
@@ -128,5 +166,5 @@ pub enum BenchmarkError {
     #[error("error preparing JsonSki bench")]
     JsonSkiError(#[from] JsonSkiError),
     #[error("error preparing JSurfer bench")]
-    JSurferError(#[from] JSurferError)
+    JSurferError(#[from] JSurferError),
 }
