@@ -10,7 +10,6 @@ eyre = "0.6.8"
 jni = { version = "0.19.0", features = ["invocation", "default"] }
 libc = "0.2.126"
 lazy_static = "1.4.0"
-jq-rs = "0.4.1"
 
 [dev-dependencies]
 criterion = "0.4.0"

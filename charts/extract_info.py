@@ -40,8 +40,9 @@ def get_exp_data(path=None):
         L[fname] = e
     return groups
 
-def get_dataset():
-    datapath = pathlib.Path(rootpath, "data")
+def get_dataset(path=None):
+    path = path if path else rootpath
+    datapath = pathlib.Path(path, "data")
     it = os.walk(datapath)
     for directory,_,fs in it:
         for filename in fs:
@@ -49,8 +50,8 @@ def get_dataset():
                 p = pathlib.Path(directory, filename)
                 yield p
 
-def get_query_names():
-    d = get_exp_data()
+def get_query_names(path=None):
+    d = get_exp_data(path=path)
     exps = list(sorted(d))
     exps_short = [f"{exps[i][0].upper()}{i}" for i in range(len(exps))]
     return exps_short, exps

@@ -21,8 +21,8 @@ Benchmark suite for [`rsonpath`](https://github.com/v0ldek/rsonpath).
 3. The `jq` dev pacakge installed as recommanded by [jq-rs crate](https://docs.rs/jq-rs/0.4.1/jq_rs/).
 
 On x86_64 Ubuntu the latters can be done by installing `openjdk-17-jdk` and exporting `JAVA_HOME` as
-`/usr/lib/jvm/java-1.17.0-openjdk-amd64` and installing `libjq-dev` and exporting 
-`JQ_LIB_DIR` to `/usr/lib/x86_64-linux-gnu/`
+`/usr/lib/jvm/java-1.17.0-openjdk-amd64`.
+
 ## Usage
 
 To benchmark a dataset run

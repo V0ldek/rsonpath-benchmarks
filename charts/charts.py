@@ -15,8 +15,7 @@ from extract_info import *
 if __name__ == "__main__":
     matplotlib.style.use("seaborn")
     plot.rcParams.update({
-        "text.usetex": True,
-        "font.family": "Helvetica"
+        "font.size": 15
     })
     path = None
     if len(sys.argv) > 1:
@@ -30,12 +29,13 @@ if __name__ == "__main__":
             continue
         d2[e] = h = {}
         for x in v:
-            size = v[x]["throughput"]["BytesDecimal"]
+            t = v[x]["throughput"]
+            size = t.get("BytesDecimal", t.get("Bytes"))
             stdev = v[x]["estimates"]["median"][1]
             median = v[x]["estimates"]["median"][0]
             h[x] = size/median #(size/(median+stdev), size/median, size/(median-stdev))
     
-    exps_short, exps = get_query_names() 
+    exps_short, exps = get_query_names(path=path) 
     jsurfer = np.array([d2[e].get("jsurfer", 0) for e in exps])
     rsonpath = np.array([d2[e].get("rsonpath", 0) for e in exps])
     jsonski = np.array([d2[e].get("jsonski", 0) for e in exps])
@@ -45,29 +45,29 @@ if __name__ == "__main__":
     pos = np.array(range(len(exps)))
     fig, (ax0, ax1) = plot.subplots(1, 2, gridspec_kw={'width_ratios':[1, ratio]})
     bar = ax0.bar(exps_short, jsurfer, width=width, label="jsurfer", color="tab:gray")
-    ax0.legend()
-    ax0.set_ylabel("$\\textrm{GByte}/\\textrm{s}$")
+    ax0.legend(prop={"size":12})
+    ax0.set_ylabel("GB/s")
     #ax0.bar_label(bar, [f"{e:0.2f}" for e in jsurfer])
 
     width = width/ratio
 
-    bar = ax1.bar(pos-width/2-0.01, rsonpath, label="rsonpath", width=width, color="tab:blue")
+    bar = ax1.bar(pos+width/2+0.05, rsonpath, label="rsonpath", width=width, color="tab:blue")
     ax1.set_xticks(pos)
     ax1.set_xticklabels(exps_short)
-    ax1.bar_label(bar, [f"${{\\times}}\!{e:0.0f}$" for e in rsonpath/jsurfer], fontsize=9)
+    ax1.bar_label(bar, [f"x{e:0.0f}" for e in rsonpath/jsurfer])
     pos2, jsonski2 = zip(*filter(lambda e:e[1] > 0, zip(pos, jsonski)))
     jsonski2 = np.array(jsonski2)
     pos2 = np.array(pos2)
 
-    bar = ax1.bar(pos2+width/2+0.01, jsonski2, label="jsonski", width=width, color="tab:red")
-    ax1.bar_label(bar, [f"${{\\times}}\!{e:0.0f}$" for e in filter(bool, jsonski/jsurfer)], fontsize=9)
-    ax1.set_ylabel("$\\textrm{GByte}/\\textrm{s}$")
-    ax1.legend()
+    bar = ax1.bar(pos2-width/2-0.05, jsonski2, label="jsonski", width=width, color="tab:red")
+    ax1.bar_label(bar, [f"x{e:0.0f}" for e in filter(bool, jsonski/jsurfer)])
+    ax1.set_ylabel("GB/s")
+    ax0.legend(prop={"size":20})
     fig.tight_layout()
     fig.set_size_inches(20, 5)
     plot.subplots_adjust(wspace=0.1, left=0.04)
     plot.savefig("plot.png")
-
+    sys.exit(0)
     queries = {}
     for e,v in d.items():
         if "rsonpath" not in v:
