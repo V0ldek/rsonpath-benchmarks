@@ -46,7 +46,7 @@ pub fn author_affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
     Ok(())
 }
-pub fn editor_addiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
+pub fn editor_affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("editor", dataset::crossref(2))?
         .add_all_targets_except_jsonski("$..editor..affiliation..name")?
         .add_target(BenchTarget::JsonSki(
@@ -98,7 +98,8 @@ pub fn scalability16(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 benchsets!(
     crossref_benches,
-    affiliation,
+    author_affiliation,
+    editor_affiliation,
     orcid,
     title,
     doi,
