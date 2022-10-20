@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     width = width/ratio
 
-    bar = ax1.bar(pos+width/2+0.03, rsonpath, label="rsonpath", width=width, color="tab:blue", zorder=3)
+    bar = ax1.bar(pos+width/2+0.03, rsonpath, label="simdpath", width=width, color="tab:blue", zorder=3)
     ax1.set_xticks(pos)
     ax1.set_xticklabels(exps_short)
     ax1.bar_label(bar, [f"{e:0.0f}" for e in rsonpath/jsurfer])

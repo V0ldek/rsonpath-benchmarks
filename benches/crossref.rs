@@ -34,11 +34,23 @@ pub fn orcid(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
-pub fn affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
+pub fn author_affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("affiliation", dataset::crossref(2))?
-        //.add_all_targets_except_jsonski("$..affiliation..name")?
+        .add_all_targets_except_jsonski("$..author..affiliation..name")?
         .add_target(BenchTarget::JsonSki(
             "$.items[*].author[*].affiliation[*].name",
+        ))?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+pub fn editor_addiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("editor", dataset::crossref(2))?
+        .add_all_targets_except_jsonski("$..editor..affiliation..name")?
+        .add_target(BenchTarget::JsonSki(
+            "$.items[*].editor[*].affiliation[*].name",
         ))?
         .finish();
 
@@ -92,7 +104,7 @@ benchsets!(
     doi,
     scalability0,
     scalability1,
-    scalability2,
+    //scalability2,
     scalability4,
     scalability8,
     scalability16,
