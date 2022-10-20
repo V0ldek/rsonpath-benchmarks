@@ -27,9 +27,9 @@ On linux system with `wget` installed run the script `sh dl.sh`. Otherwise you c
 
 For more information, refers to:
 
-* Crossref: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7225594.svg)](https://doi.org/10.5281/zenodo.7225594)
-* Twitter: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7225577.svg)](https://doi.org/10.5281/zenodo.7225577)
-* AST: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7225575.svg)](https://doi.org/10.5281/zenodo.7225575)
+* AST: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7229269.svg)](https://doi.org/10.5281/zenodo.7229269)
+* Twitter: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7229287.svg)](https://doi.org/10.5281/zenodo.7229287)
+* Crossref: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7229287.svg)](https://doi.org/10.5281/zenodo.7231920)
 
 For the benchmark to work, the directory layout should be as follows:
 
