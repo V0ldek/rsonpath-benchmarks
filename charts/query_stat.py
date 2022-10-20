@@ -16,6 +16,7 @@ datasets = {e.parent.name:e for e in get_dataset(path=path)}
 queries = []
 for i in range(len(exps)):
     queries.append((short_exps[i], exp_data[exps[i]]["rsonpath"]["value_str"], exps[i].split("_")[0]))
+print("\n".join(map(str, queries)))
 binary = pathlib.Path(rootpath.parent, "rsonpath", "target", "release", "rsonpath")
 print(binary)
 print("short name", "match", "query", sep="&\t", end="\\\\\n")

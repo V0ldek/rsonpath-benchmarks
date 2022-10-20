@@ -26,8 +26,6 @@ if __name__ == "__main__":
     d = get_exp_data(path=path)
     d2 = {}
     for e,v in d.items():
-        if "rsonpath" not in v:
-            continue
         d2[e] = h = {}
         for x in v:
             t = v[x]["throughput"]
@@ -37,8 +35,12 @@ if __name__ == "__main__":
             h[x] = size/median #(size/(median+stdev), size/median, size/(median-stdev))
     
     exps_short, exps = get_query_names(path=path) 
-    print(exps_short, exps)
+    exps_short = list(filter(lambda e:"S" not in e, exps_short))
+    exps = list(filter(lambda e:"scala" not in e.lower(), exps))
+    print("\n".join(f"{e}:{f}" for e,f in zip(exps_short, exps)))
+    print("\n".join(d2))
     jsurfer = np.array([d2[e].get("jsurfer", 0) for e in exps])
+    print(jsurfer)
     rsonpath = np.array([d2[e].get("rsonpath", 0) for e in exps])
     jsonski = np.array([d2[e].get("jsonski", 0) for e in exps])
     width = 0.6
@@ -54,7 +56,7 @@ if __name__ == "__main__":
 
     width = width/ratio
 
-    bar = ax1.bar(pos+width/2+0.03, rsonpath, label="simdpath", width=width, color="tab:blue", zorder=3)
+    bar = ax1.bar(pos+width/2+0.03, rsonpath, label="simdpath", width=width, color="tab:blue", zorder=4)
     ax1.set_xticks(pos)
     ax1.set_xticklabels(exps_short)
     ax1.bar_label(bar, [f"{e:0.0f}" for e in rsonpath/jsurfer])
@@ -62,8 +64,8 @@ if __name__ == "__main__":
     jsonski2 = np.array(jsonski2)
     pos2 = np.array(pos2)
 
-    bar = ax1.bar(pos2-width/2-0.03, jsonski2, label="jsonski", width=width, color="tab:red")
-    ax1.bar_label(bar, [f"{e:0.0f}" for e in filter(bool, jsonski/jsurfer)], zorder=3)
+    bar = ax1.bar(pos2-width/2-0.03, jsonski2, label="jsonski", width=width, color="tab:red", zorder=4)
+    ax1.bar_label(bar, [f"{e:0.0f}" for e in filter(bool, jsonski/jsurfer)], zorder=4)
     ax1.set_ylabel("GB/s")
     ax1.grid(color = 'white', linestyle = '-', linewidth = 3, zorder=1)
     ax1.legend()

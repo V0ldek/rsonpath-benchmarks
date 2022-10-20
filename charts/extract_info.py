@@ -34,8 +34,10 @@ def get_exp_data(path=None):
     groups = {}
     for e in exps:
         fname = e["function_id"]
-        if fname not in ("rsonpath", "jsonski", "jsurfer"):
-            continue
+        if "_" in fname:
+            for prog in ("rsonpath", "jsonski", "jsurfer"):
+                if prog.lower() in fname:
+                    fname = prog
         groups[e["group_id"]] = L = groups.get(e["group_id"], {})
         L[fname] = e
     return groups

@@ -53,9 +53,7 @@ pub fn editor_affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
             "$.items[*].editor[*].affiliation[*].name",
         ))?
         .finish();
-
     benchset.run(c);
-
     Ok(())
 }
 

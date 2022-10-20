@@ -88,7 +88,7 @@ impl Benchset {
         };
 
         Ok(Self {
-            id: id.into(),
+            id: format!("{}_{}", json_document.file_path, id.into()),
             options: BenchmarkOptions {
                 warm_up_time,
                 measurement_time,
