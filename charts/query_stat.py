@@ -4,10 +4,15 @@ import pathlib
 from extract_info import *
 import subprocess
 import sys
+path = None
+if len(sys.argv) > 1:
+    path = pathlib.Path(sys.argv[1])
+    if not path.is_dir():
+        raise ValueError("Expect a path to a directory in input")
 
-exp_data = get_exp_data()
-short_exps, exps = get_query_names()
-datasets = {e.parent.name:e for e in get_dataset()}
+exp_data = get_exp_data(path=path)
+short_exps, exps = get_query_names(path=path)
+datasets = {e.parent.name:e for e in get_dataset(path=path)}
 queries = []
 for i in range(len(exps)):
     queries.append((short_exps[i], exp_data[exps[i]]["rsonpath"]["value_str"], exps[i].split("_")[0]))

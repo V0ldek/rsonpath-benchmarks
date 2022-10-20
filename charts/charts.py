@@ -37,6 +37,7 @@ if __name__ == "__main__":
             h[x] = size/median #(size/(median+stdev), size/median, size/(median-stdev))
     
     exps_short, exps = get_query_names(path=path) 
+    print(exps_short, exps)
     jsurfer = np.array([d2[e].get("jsurfer", 0) for e in exps])
     rsonpath = np.array([d2[e].get("rsonpath", 0) for e in exps])
     jsonski = np.array([d2[e].get("jsonski", 0) for e in exps])

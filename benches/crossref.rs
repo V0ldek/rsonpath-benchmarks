@@ -35,7 +35,7 @@ pub fn orcid(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 
 pub fn author_affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("affiliation", dataset::crossref(2))?
+    let benchset = Benchset::new("author_affiliation", dataset::crossref(2))?
         .add_all_targets_except_jsonski("$..author..affiliation..name")?
         .add_target(BenchTarget::JsonSki(
             "$.items[*].author[*].affiliation[*].name",
