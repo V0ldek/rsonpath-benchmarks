@@ -1,8 +1,10 @@
 import os
 import pathlib
 import json
+import numpy as np
 
 rootpath = pathlib.Path(__file__).parent.parent
+
 
 def collect_exps(path=None):
     path = pathlib.Path(rootpath, "target", "criterion") if path is None else path
@@ -57,3 +59,21 @@ def get_query_names(path=None):
     exps = list(sorted(d))
     exps_short = [f"{exps[i][0].upper()}{i}" for i in range(len(exps))]
     return exps_short, exps
+
+def format_bench(name):
+    a,b = name.split(".json_", maxsplit=1)
+    bench = a.split("/")[-1]
+    query = b
+    return bench, query, name 
+
+def process_exp_data(data):
+    d2 = {}
+    for e,v in data.items():
+        d2[e] = h = {}
+        for x in v:
+            t = v[x]["throughput"]
+            size = t.get("BytesDecimal", t.get("Bytes"))
+            stdev = v[x]["estimates"]["median"][1]
+            median = v[x]["estimates"]["median"][0]
+            h[x] = size/median #(size/(median+stdev), size/median, size/(median-stdev))
+    return d2

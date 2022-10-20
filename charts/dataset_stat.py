@@ -23,17 +23,18 @@ def density(tree):
         L = tree.values()
     return sum(density(e) for e in L) + 1
     
-print("file", "size", "depth", "verbosity", sep="\t")
-dataset = {}
-for p in get_dataset(): 
-    with open(p) as f:
-        x = f.read()
-    d = json.loads(x)
-    size = len(x)
-    if size < 1000000:
-        size = f"{size/1000:0.1f} KB"
-    else:
-        size = f"{size/1000000:0.1f} MB"
-    print(p.name[:-5], size, depth(d), f"{1/(density(d)/len(x)):0.1f}", sep="\t")
-
-
+if __name__ == "__main__":
+    print("file", "size", "depth", "verbosity", sep="\t")
+    dataset = {}
+    for p in get_dataset(): 
+        with open(p) as f:
+            x = f.read()
+        d = json.loads(x)
+        size = len(x)
+        if size < 1000000:
+            size = f"{size/1000:0.1f} KB"
+        else:
+            size = f"{size/1000000:0.1f} MB"
+        print(p.name[:-5], size, depth(d), f"{1/(density(d)/len(x)):0.1f}", sep="\t")
+    
+    
