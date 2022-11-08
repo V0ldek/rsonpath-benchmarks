@@ -2,7 +2,7 @@ use std::num::TryFromIntError;
 
 use crate::framework::implementation::Implementation;
 use jni::objects::{JClass, JObject, JValue};
-use jni::signature::{JavaType, Primitive, TypeSignature};
+use jni::signature::{JavaType, Primitive, ReturnType, TypeSignature};
 use jni::{AttachGuard, InitArgsBuilder, JNIEnv, JNIVersion, JavaVM};
 use lazy_static::lazy_static;
 use thiserror::Error;
@@ -14,7 +14,6 @@ macro_rules! package {
 }
 
 const SHIM_CLASS: &str = concat!(package!(), "/Shim");
-const QUERY_CLASS: &str = concat!(package!(), "/CompiledQuery");
 const FILE_CLASS: &str = concat!(package!(), "/JsonFile");
 const COMPILE_METHOD: &str = "compileQuery";
 const LOAD_METHOD: &str = "loadFile";
@@ -28,14 +27,10 @@ fn json_file_type() -> JavaType {
     JavaType::Object(FILE_CLASS.to_owned())
 }
 
-fn compiled_query_type() -> JavaType {
-    JavaType::Object(QUERY_CLASS.to_owned())
-}
-
 fn load_file_sig() -> String {
     TypeSignature {
         args: vec![string_type()],
-        ret: json_file_type(),
+        ret: ReturnType::Object,
     }
     .to_string()
 }
@@ -43,7 +38,7 @@ fn load_file_sig() -> String {
 fn compile_query_sig() -> String {
     TypeSignature {
         args: vec![string_type()],
-        ret: compiled_query_type(),
+        ret: ReturnType::Object,
     }
     .to_string()
 }
@@ -51,7 +46,7 @@ fn compile_query_sig() -> String {
 fn overhead_sig() -> String {
     TypeSignature {
         args: vec![],
-        ret: compiled_query_type(),
+        ret: ReturnType::Object,
     }
     .to_string()
 }
@@ -59,7 +54,7 @@ fn overhead_sig() -> String {
 fn run_sig() -> String {
     TypeSignature {
         args: vec![json_file_type()],
-        ret: JavaType::Primitive(Primitive::Long),
+        ret: ReturnType::Primitive(Primitive::Long),
     }
     .to_string()
 }

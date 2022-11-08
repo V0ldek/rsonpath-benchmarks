@@ -8,7 +8,8 @@ edition = "2021"
 [dependencies]
 cfg-if = "1.0.0"
 criterion = "0.4.0"
-jni = { version = "0.19.0", features = ["invocation", "default"] }
+jni = { version = "0.20.0", features = ["invocation", "default"] }
+eyre = "0.6.8"
 libc = "0.2.126"
 lazy_static = "1.4.0"
 ouroboros = "0.15.5"
@@ -19,6 +20,7 @@ thiserror = "1.0.37"
 itertools = "0.10.3"
 regex = "1.6.0"
 memchr = "2.5.0"
+rsonpath = { path = "../rsonpath", default-features = false }
 
 [features]
 default = ["simd"]
