@@ -2,7 +2,6 @@
 
 Benchmark suite for [`rsonpath`](https://github.com/v0ldek/rsonpath).
 
-
 | Bench name            | Path                            | Size      | Depth  | Description |
 |-----------------------|---------------------------------|-----------|--------|---|
 | `ast`                 | `data/ast`                      | -        | - | JSON representation of the AST of an arbitrary popular C file from Software Heritage. To generate the AST `clang` was used: `clang -Xclang -ast-dump=json -fsyntax-only parse_date.c > ast.json` |
@@ -28,7 +27,8 @@ On x86_64 Ubuntu the latters can be done by installing `openjdk-17-jdk` and expo
 
 ## Download the dataset
 
-On linux system with `wget` installed run the script `sh dl.sh`. Otherwise you can download manually the dataset and put them in the correct folder.
+On a UNIX system with `wget` installed run the script `sh dl.sh`.
+You can also manually download the dataset and put the JSON files in the correct folder.
 
 For more information, refers to:
 
@@ -38,7 +38,7 @@ For more information, refers to:
 
 For the benchmark to work, the directory layout should be as follows:
 
-```
+```ini
 ── data
    ├── ast
    │   └── ast.json
@@ -53,16 +53,14 @@ For the benchmark to work, the directory layout should be as follows:
        └── twitter.json
 ```
 
-The md5sum of all the json file:
+The sha256sum of the JSON files, for reference:
 
-* `./data/ast/ast.json` 1fa4d1cccd576d3b8c41ae2b3e41ea9c 
-* `./data/twitter/twitter.json` 7d3c5866a899ab6c1afb010bc31f821d 
-* `./data/crossref/crossref8.json` 65fe2be99ae61662c90dcfd160f1118b 
-* `./data/crossref/crossref16.json` dd0e20c8a420428ace481fa058954936 
-* `./data/crossref/crossref2.json` f1a859af978b668e2e2bee4bfe7c53fe 
-* `./data/crossref/crossref0.json` c6eb37d4a7eb25c05dd3e32bc7dab3db 
-* `./data/crossref/crossref1.json` 3b5e505634c36158d1ae0027f7f67d83 
-* `./data/crossref/crossref4.json` 2ec1caa9a6be75e5ba8439ebfebda22d 
+* `c3ff840d153953ee08c1d9622b20f8c1dc367ae2abcb9c85d44100c6209571af  ast/ast.json`
+* `f76da4fbd5c18889012ab9bbc222cc439b4b28f458193d297666f56fc69ec500  crossref/crossref/crossref1.json`
+* `95e0038e46ce2e94a0f9dde35ec7975280194220878f83436e320881ccd252b4  crossref/crossref/crossref2.json`
+* `f14e65d4f8df3c9144748191c1e9d46a030067af86d0cc03cc67f22149143c5d  twitter/twitter.json`
+
+TODO: checksums of other crossrefs
 
 ## Usage
 
@@ -82,40 +80,39 @@ The folder `target/criterion` contains all the information needed to plot the ex
 
 ## Plotting
 
-To plot the result once the bench done.
+To plot the result once the is bench done:
 
 ```bash
 python3 charts/charts.py
 ```
 
-You can also provide a path to a `criterion` folder:
+You can also provide a path to a `criterion` folder with results:
 
 ```bash
 python3 charts/charts.py exps/chetemi
 ```
 
-The plot will be saved in the `plot.png` file of the current directory. (I know, it could be better).
+The plot will be saved in the `plot.png` file of the current directory.
 
 ## Statistics
 
 Two statistics scripts are available:
 
-* One about the dataset: 
+* One about the dataset:
 
 ```python
 python3 charts/dataset_stat.py
 ```
 
-It will plot on stdout some informations about each json-file in the `data` folder. Be aware that it will
-load the file in memory, in python. Expect it to be slow and memory consumming.
+It will plot some informations about each JSON file in the `data` folder. Be aware that it will
+load the file in memory, in Python. Expect it to be slow and memory consumming.
 
-* About the queries
+* One about the queries:
 
 ```python
 python3 charts/queries_stat.py
 ```
 
-This script will assume you run the benchmark (and look into the directory `target/criterion`) to extract the list
-of queries. It will then compute some parameters and the number of match with `rsonpath`. The binary of `rsonpath`
-should be in the path (run `cargo install rsonpath`).
-
+This script will assume you've run the benchmark to extract the list
+of queries from `target/criterion`. It will then compute some parameters and the number of query results with `rsonpath`.
+The binary of `rsonpath` should be in the path (run `cargo install rsonpath`).
