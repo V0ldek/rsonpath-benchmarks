@@ -81,7 +81,7 @@ impl Benchset {
         } else  {
             Some(Duration::from_secs(45))
         };
-        let sample_count = if json_document.size_in_bytes < 10_000_0000{
+        let sample_count = if json_document.size_in_bytes < 100_000_000{
             None
         } else {
             Some(10)
