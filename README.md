@@ -13,6 +13,11 @@ Benchmark suite for [`rsonpath`](https://github.com/v0ldek/rsonpath).
 
 ## Prerequisites
 
+The `rsonpath` project has to be available in the directory `rsonpath` right next to the root of this
+benchmark project. In other words, it has to be accessible at `../rsonpath` with respect to the root.
+This can be change locally in `Cargo.toml` &ndash; just edit the `path` component of the `rsonpath`
+dependency.
+
 1. An appropriate C++ compiler is required for the [`cc` crate](https://lib.rs/crates/cc) to compile the
    JSONSki code.
 2. JDK of version at least 8 is required and your `JAVA_HOME` environment variable must be set
