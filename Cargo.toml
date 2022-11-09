@@ -13,7 +13,7 @@ jni = { version = "0.19.0", features = ["invocation", "default"] }
 libc = "0.2.126"
 lazy_static = "1.4.0"
 ouroboros = "0.15.5"
-rsonpath = { path = "../rsonpath", default-features = false }
+rsonpath = { version = "0.1.2", default-features = false }
 thiserror = "1.0.37"
 
 [dev-dependencies]
@@ -24,7 +24,6 @@ memchr = "2.5.0"
 [features]
 default = ["simd"]
 simd = ["rsonpath/simd"]
-commas = ["rsonpath/commas"]
 
 [build-dependencies]
 cc = "1.0"
@@ -41,4 +40,8 @@ harness = false
 
 [[bench]]
 name = "ast"
+harness = false
+
+[[bench]]
+name = "rsonpath_query_compilation"
 harness = false

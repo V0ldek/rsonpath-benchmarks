@@ -12,10 +12,15 @@ Benchmark suite for [`rsonpath`](https://github.com/v0ldek/rsonpath).
 
 ## Prerequisites
 
-The `rsonpath` project has to be available in the directory `rsonpath` right next to the root of this
-benchmark project. In other words, it has to be accessible at `../rsonpath` with respect to the root.
-This can be change locally in `Cargo.toml` &ndash; just edit the `path` component of the `rsonpath`
-dependency.
+By default, the benches are performed against a released version of `rsonpath`.
+Usually you might want to run it against the local version to test your changes.
+To do that, pass a [patch config value] to `cargo`:
+
+```ini
+--config 'patch.crates-io.rsonpath.path = "../rsonpath"'
+```
+
+Additionally:
 
 1. An appropriate C++ compiler is required for the [`cc` crate](https://lib.rs/crates/cc) to compile the
    JSONSki code.
@@ -25,7 +30,7 @@ dependency.
 On x86_64 Ubuntu the latters can be done by installing `openjdk-17-jdk` and exporting `JAVA_HOME` as
 `/usr/lib/jvm/java-1.17.0-openjdk-amd64`.
 
-## Download the dataset
+### Download the dataset
 
 On a UNIX system with `wget` installed run the script `sh dl.sh`.
 You can also manually download the dataset and put the JSON files in the correct folder.
@@ -77,6 +82,12 @@ cargo bench --bench <dataset> --no-default-features
 ```
 
 The folder `target/criterion` contains all the information needed to plot the experiment.
+
+As a reminder, to test against local changes instead of a crates.io version:
+
+```bash
+cargo bench --bench <dataset> --config 'patch.crates-io.rsonpath.path = "../rsonpath"'
+```
 
 ## Plotting
 
