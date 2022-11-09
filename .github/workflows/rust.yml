@@ -19,6 +19,17 @@ jobs:
       with:
         distribution: temurin
         java-version: 17
+    - name: Cache restore
+      id: cache-restore
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: cargo-${{ hashFiles('**/Cargo.toml') }}
     - name: Build all features
       uses: actions-rs/cargo@v1
       with:
@@ -37,6 +48,17 @@ jobs:
       with:
         distribution: temurin
         java-version: 17
+    - name: Cache restore
+      id: cache-restore
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: cargo-${{ hashFiles('**/Cargo.toml') }}
     - name: Build all features
       uses: actions-rs/cargo@v1
       with:
@@ -62,6 +84,17 @@ jobs:
       with:
         distribution: temurin
         java-version: 17
+    - name: Cache restore
+      id: cache-restore
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: cargo-${{ hashFiles('**/Cargo.toml') }}
     - name: Rustup nightly toolchain
       uses: actions-rs/toolchain@v1
       with:
