@@ -45,7 +45,9 @@ pub fn all_hashtags(c: &mut Criterion) -> Result<(), BenchmarkError> {
 pub fn hashtags_of_retweets(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("hashtags_of_retweets", dataset::twitter())?
         .add_all_targets_except_jsonski("$..retweeted_status..hashtags..text")?
-        .add_target(BenchTarget::JsonSki("$.statuses[*].retweeted_status.entities.hashtags[*].text"))?
+        .add_target(BenchTarget::JsonSki(
+            "$.statuses[*].retweeted_status.entities.hashtags[*].text",
+        ))?
         .finish();
 
     benchset.run(c);

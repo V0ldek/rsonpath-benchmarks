@@ -78,10 +78,10 @@ impl Benchset {
             Some(Duration::from_secs(10))
         } else if json_document.size_in_bytes < 100_000_000 {
             Some(Duration::from_secs(25))
-        } else  {
+        } else {
             Some(Duration::from_secs(45))
         };
-        let sample_count = if json_document.size_in_bytes < 100_000_000{
+        let sample_count = if json_document.size_in_bytes < 100_000_000 {
             None
         } else {
             Some(10)
@@ -92,7 +92,7 @@ impl Benchset {
             options: BenchmarkOptions {
                 warm_up_time,
                 measurement_time,
-                sample_count
+                sample_count,
             },
             json_document,
             implementations: vec![],

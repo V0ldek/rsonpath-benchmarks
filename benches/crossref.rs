@@ -24,9 +24,7 @@ pub fn title(c: &mut Criterion) -> Result<(), BenchmarkError> {
 pub fn orcid(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("orcid", dataset::crossref(2))?
         .add_all_targets_except_jsonski("$..author..ORCID")?
-        .add_target(BenchTarget::JsonSki(
-            "$.items[*].author[*].ORCID",
-        ))?
+        .add_target(BenchTarget::JsonSki("$.items[*].author[*].ORCID"))?
         .finish();
 
     benchset.run(c);
