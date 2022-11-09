@@ -23,7 +23,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --package rsonpath --all-features
+        args: --all-features
 
   clippy:
     permissions:
