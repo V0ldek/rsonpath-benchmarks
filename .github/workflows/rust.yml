@@ -1,0 +1,22 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-java@v3.6.0
+      name: Setup Java JDK
+      with:
+        java-version: 1.17
+    - name: Build
+      run: cargo build --verbose
