@@ -9,7 +9,8 @@ pub(crate) struct JsonDocument {
 
 impl JsonDocument {
     pub(crate) fn new(file_path: String) -> Result<Self, BenchmarkError> {
-        let metadata = fs::metadata(&file_path).unwrap();
+        let metadata = fs::metadata(&file_path)
+            .map_err(|err| BenchmarkError::FileNotFound(file_path.clone().into(), err))?;
 
         Ok(Self {
             file_path,
