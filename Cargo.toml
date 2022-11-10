@@ -31,15 +31,19 @@ eyre = "0.6.8"
 
 
 [[bench]]
+name = "ast"
+harness = false
+
+[[bench]]
 name = "crossref"
 harness = false
 
 [[bench]]
-name = "twitter"
+name = "openfood"
 harness = false
 
 [[bench]]
-name = "ast"
+name = "twitter"
 harness = false
 
 [[bench]]

@@ -101,7 +101,7 @@ benchsets!(
     doi,
     scalability0,
     scalability1,
-    //scalability2,
+    scalability2,
     scalability4,
     scalability8,
     scalability16,
