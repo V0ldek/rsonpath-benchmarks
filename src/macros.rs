@@ -5,7 +5,13 @@ macro_rules! benchsets {
             let mut criterion: ::criterion::Criterion<_> = $config
                 .configure_from_args();
             $(
-                $target(&mut criterion).expect("error running benchset");
+                match $target(&mut criterion)
+                {
+                    Ok(_) => (),
+                    Err(err) => {
+                        ::std::panic!("error running benchset: {}", err);
+                    }
+                }
             )+
         }
 

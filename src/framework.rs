@@ -167,6 +167,12 @@ impl<I: Implementation> BenchFn for PreparedQuery<I> {
 pub enum BenchmarkError {
     #[error("invalid dataset file path, has to be valid UTF-8: '{0}'")]
     InvalidFilePath(PathBuf),
+    #[error(r#"dataset not found, either the path is invalid or the bench was started in an unexpected way
+    
+    Here's what can help:
+    1. Ensure the dataset was downloaded with dl.sh and exists at the path '{0}' relative to the root of the rsonpath-benchmarks crate.
+    2. Ensure the benchmarks is run with `cargo bench --bench <name>`. See the Usage section of the README."#)]
+    FileNotFound(PathBuf, #[source] std::io::Error),
     #[error("error preparing Rsonpath bench")]
     RsonpathError(#[from] RsonpathError),
     #[error("error preparing JsonSki bench")]
