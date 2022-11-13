@@ -1,7 +1,18 @@
 [package]
 name = "rsonpath-benchmarks"
-version = "0.1.0"
+authors = [
+    "Mateusz Gienieczko <mat@gienieczko.com>",
+    "Charles Paperman <charles.paperman@inria.fr>",
+]
+version = "0.1.2"
 edition = "2021"
+description = "Benchmark suite for the `rsonpath` project."
+readme = "./README.md"
+license = "MIT"
+keywords = ["rsonpath", "jsonpath", "query", "simd", "benchmark"]
+exclude = ["/data"]
+categories = ["text-processing", "development-tools"]
+repository = "https://github.com/V0ldek/rsonpath-benchmarks"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
