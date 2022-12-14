@@ -84,14 +84,6 @@ pub fn scalability4(c: &mut Criterion) -> Result<(), BenchmarkError> {
     scalability(c, 4)
 }
 
-pub fn scalability8(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    scalability(c, 8)
-}
-
-pub fn scalability16(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    scalability(c, 16)
-}
-
 benchsets!(
     crossref_benches,
     author_affiliation,
@@ -103,6 +95,4 @@ benchsets!(
     scalability1,
     scalability2,
     scalability4,
-    scalability8,
-    scalability16,
 );
