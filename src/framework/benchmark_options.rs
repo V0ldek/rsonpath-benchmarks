@@ -9,7 +9,7 @@ pub(crate) struct BenchmarkOptions {
 }
 
 impl BenchmarkOptions {
-    pub(crate) fn apply_to<'a, M: Measurement>(&self, group: &mut BenchmarkGroup<'a, M>) {
+    pub(crate) fn apply_to<M: Measurement>(&self, group: &mut BenchmarkGroup<'_, M>) {
         if let Some(duration) = self.warm_up_time {
             group.warm_up_time(duration);
         }
