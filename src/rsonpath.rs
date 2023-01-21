@@ -1,5 +1,5 @@
 use ouroboros::self_referencing;
-use rsonpath::{
+use rsonpath_lib::{
     engine::{result::CountResult, Input, Runner},
     query::JsonPathQuery,
     stackless::StacklessRunner,
@@ -35,8 +35,8 @@ impl Implementation for Rsonpath {
     }
 
     fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error> {
-        let contents = fs::read_to_string(file_path).expect("Reading from file failed.");
-        let input = Self::File::new(contents);
+        let mut contents = fs::read_to_string(file_path).expect("Reading from file failed.");
+        let input = Self::File::new(&mut contents);
 
         Ok(input)
     }
@@ -53,12 +53,16 @@ impl Implementation for Rsonpath {
     }
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<u64, Self::Error> {
-        Ok(query.with_engine(|engine| engine.run::<CountResult>(file).get() as u64))
+        query
+            .with_engine(|engine| engine.run::<CountResult>(file).map(|x| x.get() as u64))
+            .map_err(|err| err.into())
     }
 }
 
 #[derive(Error, Debug)]
 pub enum RsonpathError {
+    #[error(transparent)]
+    EngineError(#[from] rsonpath_lib::engine::error::EngineError),
     #[error("something happened")]
     Unknown(),
 }

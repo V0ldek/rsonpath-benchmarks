@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
-use rsonpath::query::JsonPathQuery;
-use rsonpath::stackless::StacklessRunner;
+use rsonpath_lib::query::JsonPathQuery;
+use rsonpath_lib::stackless::StacklessRunner;
 
 fn rsonpath_query_compilation(c: &mut Criterion, query_string: &str) {
     let mut group = c.benchmark_group(format! {"rsonpath_{}", query_string});
