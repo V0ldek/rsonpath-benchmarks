@@ -44,12 +44,11 @@ impl Implementation for Rsonpath {
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
         let query = JsonPathQuery::parse(query).unwrap();
 
-        let builder = RsonpathQueryBuilder {
-            query,
-            engine_builder: |query| StacklessRunner::compile_query(query),
-        };
+        let rsonpath = RsonpathQuery::try_new(query, |query| {
+            StacklessRunner::compile_query(query).map_err(RsonpathError::CompilerError)
+        })?;
 
-        Ok(builder.build())
+        Ok(rsonpath)
     }
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<u64, Self::Error> {
@@ -61,6 +60,8 @@ impl Implementation for Rsonpath {
 
 #[derive(Error, Debug)]
 pub enum RsonpathError {
+    #[error(transparent)]
+    CompilerError(#[from] rsonpath_lib::query::error::CompilerError),
     #[error(transparent)]
     EngineError(#[from] rsonpath_lib::engine::error::EngineError),
     #[error("something happened")]

@@ -11,7 +11,7 @@ fn rsonpath_query_compilation(c: &mut Criterion, query_string: &str) {
         |b, q| {
             b.iter(|| {
                 let query = JsonPathQuery::parse(q).unwrap();
-                black_box(StacklessRunner::compile_query(&query));
+                black_box(StacklessRunner::compile_query(&query).unwrap());
             })
         },
     );
