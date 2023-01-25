@@ -1,6 +1,6 @@
 use ouroboros::self_referencing;
 use rsonpath_lib::{
-    engine::{main::MainEngine, result::CountResult, Engine, Input},
+    engine::{main::MainEngine, result::CountResult, Compiler, Engine, Input},
     query::JsonPathQuery,
 };
 use std::fs;
