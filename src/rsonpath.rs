@@ -1,8 +1,7 @@
 use ouroboros::self_referencing;
 use rsonpath_lib::{
-    engine::{result::CountResult, Input, Runner},
+    engine::{main::MainEngine, result::CountResult, Engine, Input},
     query::JsonPathQuery,
-    stackless::StacklessRunner,
 };
 use std::fs;
 use thiserror::Error;
@@ -16,7 +15,7 @@ pub struct RsonpathQuery {
     query: JsonPathQuery,
     #[borrows(query)]
     #[not_covariant]
-    engine: StacklessRunner<'this>,
+    engine: MainEngine<'this>,
 }
 
 impl Implementation for Rsonpath {
@@ -45,7 +44,7 @@ impl Implementation for Rsonpath {
         let query = JsonPathQuery::parse(query).unwrap();
 
         let rsonpath = RsonpathQuery::try_new(query, |query| {
-            StacklessRunner::compile_query(query).map_err(RsonpathError::CompilerError)
+            MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
         })?;
 
         Ok(rsonpath)
