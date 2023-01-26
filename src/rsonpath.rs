@@ -1,12 +1,13 @@
+use crate::framework::implementation::Implementation;
 use ouroboros::self_referencing;
 use rsonpath_lib::{
-    engine::{recursive::RecursiveEngine, result::CountResult, Compiler, Engine, Input},
+    engine::{result::CountResult, Compiler, Engine, Input},
     query::JsonPathQuery,
 };
 use std::fs;
 use thiserror::Error;
 
-use crate::framework::implementation::Implementation;
+type RsonpathEngine<'a> = rsonpath_lib::engine::main::MainEngine<'a>;
 
 pub struct Rsonpath {}
 
@@ -15,7 +16,7 @@ pub struct RsonpathQuery {
     query: JsonPathQuery,
     #[borrows(query)]
     #[not_covariant]
-    engine: RecursiveEngine<'this>,
+    engine: RsonpathEngine<'this>,
 }
 
 impl Implementation for Rsonpath {
@@ -44,7 +45,7 @@ impl Implementation for Rsonpath {
         let query = JsonPathQuery::parse(query).unwrap();
 
         let rsonpath = RsonpathQuery::try_new(query, |query| {
-            RecursiveEngine::compile_query(query).map_err(RsonpathError::CompilerError)
+            RsonpathEngine::compile_query(query).map_err(RsonpathError::CompilerError)
         })?;
 
         Ok(rsonpath)
