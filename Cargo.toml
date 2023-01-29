@@ -35,6 +35,7 @@ memchr = "2.5.0"
 [features]
 default = ["simd"]
 simd = ["rsonpath-lib/simd"]
+commas = ["rsonpath-lib/commas"]
 
 [build-dependencies]
 cc = "1.0"
@@ -55,6 +56,10 @@ harness = false
 
 [[bench]]
 name = "twitter"
+harness = false
+
+[[bench]]
+name = "paper_parity"
 harness = false
 
 [[bench]]

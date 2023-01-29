@@ -46,7 +46,7 @@ impl ConfiguredBenchset {
         group.throughput(Throughput::BytesDecimal(bench.json_document.size_in_bytes));
 
         for implementation in bench.implementations.iter() {
-            let id = format!("{}_{}", &bench.id, implementation.id());
+            let id = implementation.id();
             group.bench_function(id, |b| b.iter(move || implementation.run()));
         }
 

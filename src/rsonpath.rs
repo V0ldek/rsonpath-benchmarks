@@ -1,6 +1,6 @@
 use ouroboros::self_referencing;
 use rsonpath_lib::{
-    engine::{main::MainEngine, result::CountResult, Compiler, Engine, Input},
+    engine::{recursive::RecursiveEngine, result::CountResult, Compiler, Engine, Input},
     query::JsonPathQuery,
 };
 use std::fs;
@@ -15,7 +15,7 @@ pub struct RsonpathQuery {
     query: JsonPathQuery,
     #[borrows(query)]
     #[not_covariant]
-    engine: MainEngine<'this>,
+    engine: RecursiveEngine<'this>,
 }
 
 impl Implementation for Rsonpath {
@@ -44,7 +44,7 @@ impl Implementation for Rsonpath {
         let query = JsonPathQuery::parse(query).unwrap();
 
         let rsonpath = RsonpathQuery::try_new(query, |query| {
-            MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
+            RecursiveEngine::compile_query(query).map_err(RsonpathError::CompilerError)
         })?;
 
         Ok(rsonpath)
