@@ -3,7 +3,7 @@ use rsonpath_lib::engine::{Compiler, RsonpathEngine};
 use rsonpath_lib::query::JsonPathQuery;
 
 fn rsonpath_query_compilation(c: &mut Criterion, query_string: &str) {
-    let mut group = c.benchmark_group(format! {"rsonpath_{}", query_string});
+    let mut group = c.benchmark_group(format! {"rsonpath_{query_string}"});
 
     group.bench_with_input(
         BenchmarkId::new("compile_query", query_string),

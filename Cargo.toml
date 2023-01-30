@@ -33,9 +33,9 @@ regex = "1.6.0"
 memchr = "2.5.0"
 
 [features]
-default = ["simd"]
+default = ["simd", "head-skip"]
 simd = ["rsonpath-lib/simd"]
-commas = ["rsonpath-lib/commas"]
+head-skip = ["rsonpath-lib/head-skip"]
 
 [build-dependencies]
 cc = "1.0"
