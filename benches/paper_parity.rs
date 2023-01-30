@@ -147,7 +147,7 @@ benchsets!(
     google_map_travel_modes,
     nspl_meta_columns,
     nspl_data,
-    //walmart_items_price,
-    //walmart_items_name,
+    walmart_items_price,
+    walmart_items_name,
     wiki_claims_p150
 );
