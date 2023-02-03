@@ -94,7 +94,7 @@ void JSONPathParser::updateQueryAutomaton(string query, QueryAutomaton &qa) {
                         qa.updateStateTransInfo(query_state, false, NONE, OBJECT, NULL, query_state + 1);
                         // cout<<"("<<query_state<<", false, NONE, OBJECT, NULL, "<<(query_state + 1)<<")"<<endl;
                     } else if (ch == '[') {
-                        cout<<"additional ["<<endl;
+                        //cout<<"additional ["<<endl;
                         lexer_state = 2;
                         qa.updateStateTransInfo(query_state, false, NONE, ARRAY, NULL, query_state + 1);
                         // cout<<"("<<query_state<<", false, NONE, ARRAY, NULL, "<<(query_state + 1)<<")"<<endl;
