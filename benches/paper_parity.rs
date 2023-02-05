@@ -48,6 +48,21 @@ pub fn bestbuy_products_video(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
+pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("BB3_products_video_only", dataset::pison_bestbuy_large())?
+        .add_target(BenchTarget::Rsonpath(
+            "$.products[*].videoChapters",
+        ))?
+        .add_target(BenchTarget::JsonSki(
+            "$.products[*].videoChapters",
+        ))?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
 pub fn google_map_routes(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("GMD1_routes", dataset::pison_google_map_large())?
         .add_target(BenchTarget::Rsonpath(
@@ -143,6 +158,7 @@ benchsets!(
     twitter_text,
     bestbuy_products_category,
     bestbuy_products_video,
+    bestbuy_products_video_only,
     google_map_routes,
     google_map_travel_modes,
     nspl_meta_columns,
