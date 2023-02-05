@@ -50,12 +50,8 @@ pub fn bestbuy_products_video(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("BB3_products_video_only", dataset::pison_bestbuy_large())?
-        .add_target(BenchTarget::Rsonpath(
-            "$.products[*].videoChapters",
-        ))?
-        .add_target(BenchTarget::JsonSki(
-            "$.products[*].videoChapters",
-        ))?
+        .add_target(BenchTarget::Rsonpath("$.products[*].videoChapters"))?
+        .add_target(BenchTarget::JsonSki("$.products[*].videoChapters"))?
         .finish();
 
     benchset.run(c);
