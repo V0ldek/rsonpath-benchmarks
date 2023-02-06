@@ -4,6 +4,7 @@ use sha2::{Digest, Sha256};
 use std::fmt::Display;
 use std::fs;
 use std::io::{self, Read, Write};
+use std::path::{Path, PathBuf};
 use thiserror::Error;
 
 type Sha256Digest = [u8; 32];
@@ -24,16 +25,35 @@ pub struct Dataset {
 #[derive(Debug, Clone)]
 pub enum DatasetSource {
     UrlJson(&'static str),
-    UrlArchive(&'static str, Sha256Digest),
-    UrlTarArchive(&'static str, &'static str, Sha256Digest),
+    UrlArchive(DatasetArchive),
+    UrlTarArchive(DatasetArchive, &'static str),
+}
+
+#[derive(Debug, Clone)]
+pub struct DatasetArchive {
+    url: &'static str,
+    checksum: Sha256Digest,
 }
 
 impl DatasetSource {
     fn url(&self) -> &'static str {
         match self {
             Self::UrlJson(url) => url,
-            Self::UrlArchive(url, _) => url,
-            Self::UrlTarArchive(url, _, _) => url,
+            Self::UrlArchive(archive) | Self::UrlTarArchive(archive, _) => archive.url,
+        }
+    }
+}
+
+impl DatasetArchive {
+    fn validate_archive_checksum(&self, actual: Sha256Digest) -> Result<(), DatasetError> {
+        if self.checksum != actual {
+            Err(DatasetError::InvalidArchiveChecksum(
+                self.url,
+                self.checksum,
+                actual,
+            ))
+        } else {
+            Ok(())
         }
     }
 }
@@ -64,12 +84,31 @@ impl Dataset {
         }
     }
 
+    fn json_path(&self) -> &Path {
+        self.path.as_ref()
+    }
+
+    fn directory_path(&self) -> Result<&Path, DatasetError> {
+        self.json_path()
+            .parent()
+            .ok_or(DatasetError::InvalidPath(self.path))
+    }
+
+    fn create_directories(&self) -> Result<(), DatasetError> {
+        fs::create_dir_all(self.directory_path()?).map_err(DatasetError::FileSystemError)
+    }
+
+    fn archive_path(&self) -> PathBuf {
+        self.json_path().with_extension("gz")
+    }
+
     fn load_file(&self) -> Result<Option<JsonFile>, DatasetError> {
         match fs::File::open(self.path) {
             Ok(f) => {
                 let reader = io::BufReader::new(f);
                 let progress = get_progress_bar("Checking dataset integrity...", None);
-                let (md5, size_in_bytes) = read_and_digest(progress.wrap_read(reader), |_| Ok(()))?;
+                let (md5, size_in_bytes) =
+                    read_digest_and_write::<_, fs::File>(progress.wrap_read(reader), None)?;
 
                 Ok(Some(JsonFile {
                     file_path: self.path.to_string(),
@@ -85,31 +124,22 @@ impl Dataset {
     fn download_file(&self) -> Result<JsonFile, DatasetError> {
         match self.source {
             DatasetSource::UrlJson(url) => self.download_json(url),
-            DatasetSource::UrlArchive(url, md5) => self.download_archive(url, md5),
-            DatasetSource::UrlTarArchive(url, initial_path, md5) => {
-                self.download_tar_archive(url, initial_path, md5)
+            DatasetSource::UrlArchive(ref archive) => self.download_archive(archive),
+            DatasetSource::UrlTarArchive(ref archive, initial_path) => {
+                self.download_tar_archive(archive, initial_path.as_ref())
             }
         }
     }
 
     fn download_json(&self, url: &'static str) -> Result<JsonFile, DatasetError> {
-        use std::path;
-
-        let path: &path::Path = self.path.as_ref();
-        let directory_path = path.parent().ok_or(DatasetError::InvalidPath(self.path))?;
-        fs::create_dir_all(directory_path).map_err(DatasetError::FileSystemError)?;
-        let mut file = fs::File::create(path).map_err(DatasetError::FileSystemError)?;
+        self.create_directories()?;
+        let mut file = fs::File::create(self.json_path()).map_err(DatasetError::FileSystemError)?;
 
         let response = make_download_request(url)?;
-
         let progress = get_progress_bar("Downloading", response.content_length());
-        let (md5, size_in_bytes) = read_and_digest(response, |buf| {
-            progress.inc(buf.len() as u64);
-            file.write_all(buf).map_err(DatasetError::FileSystemError)
-        })?;
+        let (md5, size_in_bytes) =
+            read_digest_and_write(progress.wrap_read(response), Some(&mut file))?;
         progress.finish_and_clear();
-
-        eprintln!("Downloaded {url}.");
 
         Ok(JsonFile {
             file_path: self.path.to_string(),
@@ -118,55 +148,32 @@ impl Dataset {
         })
     }
 
-    fn download_archive(
-        &self,
-        url: &'static str,
-        archive_md5: Sha256Digest,
-    ) -> Result<JsonFile, DatasetError> {
+    fn download_archive(&self, archive: &DatasetArchive) -> Result<JsonFile, DatasetError> {
         use flate2::read::GzDecoder;
-        use std::path;
 
-        let json_path: &path::Path = self.path.as_ref();
-        let directory_path = json_path
-            .parent()
-            .ok_or(DatasetError::InvalidPath(self.path))?;
-        let archive_path = json_path.with_extension("gz");
-        fs::create_dir_all(directory_path).map_err(DatasetError::FileSystemError)?;
+        self.create_directories()?;
+        let archive_path = self.archive_path();
         let mut archive_file =
             fs::File::create(&archive_path).map_err(DatasetError::FileSystemError)?;
 
-        let response = make_download_request(url)?;
-
+        let response = make_download_request(archive.url)?;
         let progress = get_progress_bar("Downloading", response.content_length());
-        let (md5, archive_size) = read_and_digest(response, |buf| {
-            progress.inc(buf.len() as u64);
-            archive_file
-                .write_all(buf)
-                .map_err(DatasetError::InputOutputError)
-        })?;
+        let (checksum, archive_size) =
+            read_digest_and_write(progress.wrap_read(response), Some(&mut archive_file))?;
         progress.finish_and_clear();
         archive_file
             .flush()
             .map_err(DatasetError::InputOutputError)?;
-        let mut json_file = fs::File::create(json_path).map_err(DatasetError::FileSystemError)?;
 
-        if archive_md5 != md5 {
-            return Err(DatasetError::InvalidArchiveChecksum(
-                self.source.url(),
-                archive_md5,
-                md5,
-            ));
-        }
+        archive.validate_archive_checksum(checksum)?;
 
+        let mut json_file =
+            fs::File::create(self.json_path()).map_err(DatasetError::FileSystemError)?;
         let archive_file = fs::File::open(archive_path).map_err(DatasetError::FileSystemError)?;
-        let progress =
-            get_progress_bar("Extracting", Some(archive_size as u64)).wrap_read(archive_file);
-        let gz = GzDecoder::new(progress);
-        let (md5, size_in_bytes) = read_and_digest(gz, |buf| {
-            json_file
-                .write_all(buf)
-                .map_err(DatasetError::InputOutputError)
-        })?;
+        let progress = get_progress_bar("Extracting", Some(archive_size as u64));
+        let gz = GzDecoder::new(progress.wrap_read(archive_file));
+        let (md5, size_in_bytes) = read_digest_and_write(gz, Some(&mut json_file))?;
+        progress.finish_and_clear();
 
         Ok(JsonFile {
             file_path: self.path.to_string(),
@@ -177,55 +184,29 @@ impl Dataset {
 
     fn download_tar_archive(
         &self,
-        url: &'static str,
-        initial_path: &'static str,
-        archive_md5: Sha256Digest,
+        archive: &DatasetArchive,
+        initial_path: &Path,
     ) -> Result<JsonFile, DatasetError> {
-        use flate2::read::GzDecoder;
-        use std::path;
-        use tar::Archive;
-
-        let json_path: &path::Path = self.path.as_ref();
-        let directory_path = json_path
-            .parent()
-            .ok_or(DatasetError::InvalidPath(self.path))?;
-        let archive_path = json_path.with_extension("gz");
-        fs::create_dir_all(directory_path).map_err(DatasetError::FileSystemError)?;
+        self.create_directories()?;
+        let archive_path = self.archive_path();
         let mut archive_file =
             fs::File::create(&archive_path).map_err(DatasetError::FileSystemError)?;
 
-        let response = make_download_request(url)?;
-
+        let response = make_download_request(archive.url)?;
         let progress = get_progress_bar("Downloading", response.content_length());
-        let (md5, archive_size) = read_and_digest(response, |buf| {
-            progress.inc(buf.len() as u64);
-            archive_file
-                .write_all(buf)
-                .map_err(DatasetError::InputOutputError)
-        })?;
+        let (checksum, archive_size) =
+            read_digest_and_write(progress.wrap_read(response), Some(&mut archive_file))?;
         progress.finish_and_clear();
         archive_file
             .flush()
             .map_err(DatasetError::InputOutputError)?;
 
-        if archive_md5 != md5 {
-            return Err(DatasetError::InvalidArchiveChecksum(
-                self.source.url(),
-                archive_md5,
-                md5,
-            ));
-        }
+        archive.validate_archive_checksum(checksum)?;
 
-        let archive_file = fs::File::open(archive_path).map_err(DatasetError::FileSystemError)?;
-        let progress =
-            get_progress_bar("Extracting", Some(archive_size as u64)).wrap_read(archive_file);
-        let gz = GzDecoder::new(progress);
-        let mut tar = Archive::new(gz);
-        tar.unpack(initial_path)
-            .map_err(DatasetError::InputOutputError)?;
+        unpack_tar_gz(&archive_path, archive_size, initial_path)?;
 
-        let json_file = fs::File::open(json_path).map_err(DatasetError::FileSystemError)?;
-        let (md5, size_in_bytes) = read_and_digest(json_file, |_| Ok(()))?;
+        let json_file = fs::File::open(self.json_path()).map_err(DatasetError::FileSystemError)?;
+        let (md5, size_in_bytes) = read_digest_and_write::<fs::File, fs::File>(json_file, None)?;
 
         Ok(JsonFile {
             file_path: self.path.to_string(),
@@ -233,6 +214,23 @@ impl Dataset {
             size_in_bytes,
         })
     }
+}
+
+fn unpack_tar_gz(
+    archive_path: &Path,
+    archive_size: usize,
+    target_path: &Path,
+) -> Result<(), DatasetError> {
+    use flate2::read::GzDecoder;
+    use tar::Archive;
+
+    let archive_file = fs::File::open(archive_path).map_err(DatasetError::FileSystemError)?;
+    let progress =
+        get_progress_bar("Extracting", Some(archive_size as u64)).wrap_read(archive_file);
+    let gz = GzDecoder::new(progress);
+    let mut tar = Archive::new(gz);
+    tar.unpack(target_path)
+        .map_err(DatasetError::InputOutputError)
 }
 
 fn make_download_request(url: &'static str) -> Result<reqwest::Response, DatasetError> {
@@ -261,10 +259,13 @@ where
     progress
 }
 
-fn read_and_digest<R, F>(mut reader: R, mut f: F) -> Result<(Sha256Digest, usize), DatasetError>
+fn read_digest_and_write<R, W>(
+    mut reader: R,
+    mut writer: Option<&mut W>,
+) -> Result<(Sha256Digest, usize), DatasetError>
 where
     R: Read,
-    F: FnMut(&[u8]) -> Result<(), DatasetError>,
+    W: Write,
 {
     let mut total_size = 0;
     let mut buf = [0; 4194304];
@@ -278,7 +279,11 @@ where
         }
         total_size += size;
         hasher.update(&buf[..size]);
-        f(&buf[..size])?;
+
+        if let Some(w) = writer.as_mut() {
+            w.write_all(&buf[..size])
+                .map_err(DatasetError::InputOutputError)?;
+        }
     }
 
     Ok((hasher.finalize().into(), total_size))
@@ -301,9 +306,11 @@ pub const fn ast() -> Dataset {
 
 pub fn crossref(size: u32) -> Dataset {
     let source = DatasetSource::UrlTarArchive(
-        "https://zenodo.org/record/7343312/files/crossref.tar.gz",
+        DatasetArchive {
+            url: "https://zenodo.org/record/7343312/files/crossref.tar.gz",
+            checksum: hex!("eddb87d1cf7490974236c3ba68a0e4237189aec4b9c27befd020d6e24d45c1db"),
+        },
         dataset_path!(""),
-        hex!("eddb87d1cf7490974236c3ba68a0e4237189aec4b9c27befd020d6e24d45c1db"),
     );
 
     match size {
@@ -357,10 +364,10 @@ pub const fn pison_bestbuy_large() -> Dataset {
     Dataset {
         name: "pison_bestbuy",
         path: dataset_path!("pison/bestbuy_large_record.json"),
-        source: DatasetSource::UrlArchive(
-            "https://zenodo.org/record/7607865/files/bestbuy_large_record.json.gz",
-            hex!("c8d5efe683256e1530922b7d198fd33c2c8764a594b04b6e8bd29346b09cfb3e"),
-        ),
+        source: DatasetSource::UrlArchive(DatasetArchive {
+            url: "https://zenodo.org/record/7607865/files/bestbuy_large_record.json.gz",
+            checksum: hex!("c8d5efe683256e1530922b7d198fd33c2c8764a594b04b6e8bd29346b09cfb3e"),
+        }),
         checksum: hex!("8eee3043d6d0a11cecb43e169f70fae83c68efa7fe4a5508aa2192f717c45617"),
     }
 }
@@ -369,10 +376,10 @@ pub const fn pison_google_map() -> Dataset {
     Dataset {
         name: "pison_google_map",
         path: dataset_path!("pison/google_map_large_record.json"),
-        source: DatasetSource::UrlArchive(
-            "https://zenodo.org/record/7607889/files/google_map_large_record.json.gz",
-            hex!("bff82147ec42186a016615e888c1e009f306ab0599db20afdf102cb95e6f6e5b"),
-        ),
+        source: DatasetSource::UrlArchive(DatasetArchive {
+            url: "https://zenodo.org/record/7607889/files/google_map_large_record.json.gz",
+            checksum: hex!("bff82147ec42186a016615e888c1e009f306ab0599db20afdf102cb95e6f6e5b"),
+        }),
         checksum: hex!("cdbc090edf4faeea80d917e3a2ff618fb0a42626eeac5a4521dae471e4f53574"),
     }
 }
@@ -381,10 +388,10 @@ pub const fn pison_nspl() -> Dataset {
     Dataset {
         name: "pison_nspl",
         path: dataset_path!("pison/nspl_large_record.json"),
-        source: DatasetSource::UrlArchive(
-            "https://zenodo.org/record/7607878/files/nspl_large_record.json.gz",
-            hex!("9faccd67b68afd1e750af007093a42cebe876af2143d5954f1607aa8b05479a5"),
-        ),
+        source: DatasetSource::UrlArchive(DatasetArchive {
+            url: "https://zenodo.org/record/7607878/files/nspl_large_record.json.gz",
+            checksum: hex!("9faccd67b68afd1e750af007093a42cebe876af2143d5954f1607aa8b05479a5"),
+        }),
         checksum: hex!("174978fd3d7692dbf641c00c80b34e3ff81f0d3d4602c89ee231b989e6a30dd3"),
     }
 }
@@ -393,10 +400,10 @@ pub const fn pison_twitter() -> Dataset {
     Dataset {
         name: "pison_twitter",
         path: dataset_path!("pison/twitter_large_record.json"),
-        source: DatasetSource::UrlArchive(
-            "https://zenodo.org/record/7607891/files/twitter_large_record.json.gz",
-            hex!("4e8bfb5e68bd1b4a9c69c7f2515eb65608ce84e3c284ecb1fe6908eb57b4e650"),
-        ),
+        source: DatasetSource::UrlArchive(DatasetArchive {
+            url: "https://zenodo.org/record/7607891/files/twitter_large_record.json.gz",
+            checksum: hex!("4e8bfb5e68bd1b4a9c69c7f2515eb65608ce84e3c284ecb1fe6908eb57b4e650"),
+        }),
         checksum: hex!("2357e2bdba1d621a20c2278a88bdec592e93c680de17d8403d9e3018c7539da6"),
     }
 }
@@ -405,10 +412,10 @@ pub const fn pison_walmart() -> Dataset {
     Dataset {
         name: "pison_walmart",
         path: dataset_path!("pison/walmart_large_record.json"),
-        source: DatasetSource::UrlArchive(
-            "https://zenodo.org/record/7607882/files/walmart_large_record.json.gz",
-            hex!("3ba4309dd620463045a3996596805f738ead2b257cf7152ea6b1f8ab339e71f4"),
-        ),
+        source: DatasetSource::UrlArchive(DatasetArchive {
+            url: "https://zenodo.org/record/7607882/files/walmart_large_record.json.gz",
+            checksum: hex!("3ba4309dd620463045a3996596805f738ead2b257cf7152ea6b1f8ab339e71f4"),
+        }),
         checksum: hex!("ebad2cf96871a1c2277c2a19dcc5818f9c2aed063bc8a56459f378024c5a6e14"),
     }
 }
@@ -417,10 +424,10 @@ pub const fn pison_wiki() -> Dataset {
     Dataset {
         name: "pison_wiki",
         path: dataset_path!("pison/wiki_large_record.json"),
-        source: DatasetSource::UrlArchive(
-            "https://zenodo.org/record/7607884/files/wiki_large_record.json.gz",
-            hex!("60755f971307f29cebbb7daa8624acec41c257dfef5c1543ca0934f5b07edcf7"),
-        ),
+        source: DatasetSource::UrlArchive(DatasetArchive {
+            url: "https://zenodo.org/record/7607884/files/wiki_large_record.json.gz",
+            checksum: hex!("60755f971307f29cebbb7daa8624acec41c257dfef5c1543ca0934f5b07edcf7"),
+        }),
         checksum: hex!("1abea7979812edc38651a631b11faf64f1eb5a61e2ee875b4e4d4f7b15a8cea9"),
     }
 }

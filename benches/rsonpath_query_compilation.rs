@@ -42,13 +42,21 @@ pub fn many_components(c: &mut Criterion) {
     )
 }
 
+pub fn wildcard_explosion(c: &mut Criterion) {
+    rsonpath_query_compilation(
+        c,
+        "$['a'][*][*]..['b']..['c'][*][*]['a'][*]..['a'][*]['a'][*][*][*][*]..['a'][*][*]['a'][*]['a'][*]['b'][*][*][*][*][*][*]",
+    )
+}
+
 criterion_group!(
     query_benches,
     descendant_only,
     small,
     child_only,
     paper_query,
-    many_components
+    many_components,
+    wildcard_explosion
 );
 
 criterion_main!(query_benches);
