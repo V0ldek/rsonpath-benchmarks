@@ -63,13 +63,17 @@ name = "openfood"
 harness = false
 
 [[bench]]
-name = "twitter"
-harness = false
-
-[[bench]]
 name = "paper_parity"
 harness = false
 
 [[bench]]
+name = "paper_rewrite"
+harness = false
+
+[[bench]]
 name = "rsonpath_query_compilation"
+harness = false
+
+[[bench]]
+name = "twitter"
 harness = false

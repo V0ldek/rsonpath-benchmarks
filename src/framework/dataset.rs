@@ -169,11 +169,14 @@ impl Dataset {
 
         let mut json_file =
             fs::File::create(self.json_path()).map_err(DatasetError::FileSystemError)?;
-        let archive_file = fs::File::open(archive_path).map_err(DatasetError::FileSystemError)?;
+        let archive_file = fs::File::open(&archive_path).map_err(DatasetError::FileSystemError)?;
         let progress = get_progress_bar("Extracting", Some(archive_size as u64));
         let gz = GzDecoder::new(progress.wrap_read(archive_file));
         let (md5, size_in_bytes) = read_digest_and_write(gz, Some(&mut json_file))?;
         progress.finish_and_clear();
+
+        // Ignore errors, worst case scenario the file lingers.
+        fs::remove_file(archive_path).unwrap_or(());
 
         Ok(JsonFile {
             file_path: self.path.to_string(),
@@ -207,6 +210,9 @@ impl Dataset {
 
         let json_file = fs::File::open(self.json_path()).map_err(DatasetError::FileSystemError)?;
         let (md5, size_in_bytes) = read_digest_and_write::<fs::File, fs::File>(json_file, None)?;
+
+        // Ignore errors, worst case scenario the file lingers.
+        fs::remove_file(archive_path).unwrap_or(());
 
         Ok(JsonFile {
             file_path: self.path.to_string(),
@@ -268,7 +274,7 @@ where
     W: Write,
 {
     let mut total_size = 0;
-    let mut buf = [0; 65_536];
+    let mut buf = [0; 4096];
     let mut hasher = Sha256::new();
     loop {
         let size = reader
