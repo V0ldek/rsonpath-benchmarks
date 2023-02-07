@@ -268,7 +268,7 @@ where
     W: Write,
 {
     let mut total_size = 0;
-    let mut buf = [0; 4194304];
+    let mut buf = [0; 65_536];
     let mut hasher = Sha256::new();
     loop {
         let size = reader
@@ -336,7 +336,7 @@ pub fn crossref(size: u32) -> Dataset {
             name: "crossref4",
             path: dataset_path!("crossref/crossref4.json"),
             source,
-            checksum: hex!("525c58c024fa23d7b4c38e7c108bb6912eab973ec5d315f52aa9ee505a0c292e"),
+            checksum: hex!("d47b65922745e8ac02d52483692682fc79de56f13d1c7a5cd4c98237f6c394e9"),
         },
         _ => panic!("unsupported dataset crossref{size}"),
     }
