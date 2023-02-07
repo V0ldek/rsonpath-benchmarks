@@ -158,11 +158,27 @@ pub enum BenchmarkError {
     #[error("invalid dataset file path, has to be valid UTF-8: '{0}'")]
     InvalidFilePath(PathBuf),
     #[error("error loading dataset: {0}")]
-    DatasetError(#[source] #[from] dataset::DatasetError),
+    DatasetError(
+        #[source]
+        #[from]
+        dataset::DatasetError,
+    ),
     #[error("error preparing Rsonpath bench: {0}")]
-    RsonpathError(#[source] #[from] RsonpathError),
+    RsonpathError(
+        #[source]
+        #[from]
+        RsonpathError,
+    ),
     #[error("error preparing JsonSki bench: {0}")]
-    JsonSkiError(#[source] #[from] JsonSkiError),
+    JsonSkiError(
+        #[source]
+        #[from]
+        JsonSkiError,
+    ),
     #[error("error preparing JSurfer bench: {0}")]
-    JSurferError(#[source] #[from] JSurferError),
+    JSurferError(
+        #[source]
+        #[from]
+        JSurferError,
+    ),
 }
