@@ -77,3 +77,22 @@ def process_exp_data(data):
             median = v[x]["estimates"]["median"][0]
             h[x] = size/median #(size/(median+stdev), size/median, size/(median-stdev))
     return d2
+
+
+def get_table():
+    import texttable
+    T=texttable.Texttable(max_width=0)
+    T.header(["dataset", "query", "rsonpath", "jsonski", "ratio"])
+    T.set_chars([' ', '|', '|', '-'])
+    T.set_deco(texttable.Texttable.VLINES|texttable.Texttable.HEADER|texttable.Texttable.BORDER)
+    return T
+
+def print_table_markdown(path:str):
+    data = get_exp_data(path)
+    processed = process_exp_data(data)
+    T = get_table()
+    for e, v in processed.items():
+        t = format_bench(e)
+        x, y = v["rsonpath"], v["jsonski"]
+        T.add_row((t[0],t[1], x, y, x/y))
+    return "\n".join(T.draw().split("\n")[1:-1])
