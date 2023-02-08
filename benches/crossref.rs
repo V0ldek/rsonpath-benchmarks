@@ -10,10 +10,29 @@ pub fn doi(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
+pub fn title_descendant(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("title_descendant", dataset::crossref(2))?
+        .add_all_targets_except_jsonski("$..title")?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
 pub fn title(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("title", dataset::crossref(2))?
-        .add_all_targets_except_jsonski("$..title")?
-        .add_target(BenchTarget::JsonSki("$.items[*].title"))?
+        .add_all_targets("$.items[*].title")?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+pub fn orcid_descendant(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("orcid_descendant", dataset::crossref(2))?
+        .add_all_targets_except_jsonski("$..author..ORCID")?
         .finish();
 
     benchset.run(c);
@@ -23,8 +42,7 @@ pub fn title(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 pub fn orcid(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("orcid", dataset::crossref(2))?
-        .add_all_targets_except_jsonski("$..author..ORCID")?
-        .add_target(BenchTarget::JsonSki("$.items[*].author[*].ORCID"))?
+        .add_all_targets("$.items[*].author[*].ORCID")?
         .finish();
 
     benchset.run(c);
@@ -34,10 +52,17 @@ pub fn orcid(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 pub fn author_affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("author_affiliation", dataset::crossref(2))?
+        .add_all_targets("$.items[*].author[*].affiliation[*].name")?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+pub fn author_affiliation_descendant(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("author_affiliation_descendant", dataset::crossref(2))?
         .add_all_targets_except_jsonski("$..author..affiliation..name")?
-        .add_target(BenchTarget::JsonSki(
-            "$.items[*].author[*].affiliation[*].name",
-        ))?
         .finish();
 
     benchset.run(c);
@@ -46,10 +71,15 @@ pub fn author_affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 pub fn editor_affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("editor", dataset::crossref(2))?
-        .add_all_targets_except_jsonski("$..editor..affiliation..name")?
-        .add_target(BenchTarget::JsonSki(
-            "$.items[*].editor[*].affiliation[*].name",
-        ))?
+        .add_all_targets("$.items[*].editor[*].affiliation[*].name")?
+        .finish();
+    benchset.run(c);
+    Ok(())
+}
+
+pub fn editor_affiliation_descendant(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("editor_descendant", dataset::crossref(2))?
+        .add_alldd_targets_except_jsonski("$..editor..affiliation..name")?
         .finish();
     benchset.run(c);
     Ok(())
@@ -87,9 +117,13 @@ pub fn scalability4(c: &mut Criterion) -> Result<(), BenchmarkError> {
 benchsets!(
     crossref_benches,
     author_affiliation,
+    author_affiliation_descendant,
     editor_affiliation,
+    editor_affiliation_descendant,
     orcid,
+    orcid_descendant,
     title,
+    title_descendant,
     doi,
     scalability0,
     scalability1,
