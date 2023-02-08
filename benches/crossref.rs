@@ -79,7 +79,7 @@ pub fn editor_affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 pub fn editor_affiliation_descendant(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("editor_descendant", dataset::crossref(2))?
-        .add_alldd_targets_except_jsonski("$..editor..affiliation..name")?
+        .add_all_targets_except_jsonski("$..editor..affiliation..name")?
         .finish();
     benchset.run(c);
     Ok(())
