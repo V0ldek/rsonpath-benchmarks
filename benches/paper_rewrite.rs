@@ -13,9 +13,7 @@ pub fn bestbuy_products_category(c: &mut Criterion) -> Result<(), BenchmarkError
 
 pub fn bestbuy_products_video(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("BB2'_products_video", dataset::pison_bestbuy_large())?
-        .add_target(BenchTarget::Rsonpath(
-            "$..videoChapters..chapter",
-        ))?
+        .add_target(BenchTarget::Rsonpath("$..videoChapters..chapter"))?
         .add_target(BenchTarget::JsonSki(
             "$.products[*].videoChapters[*].chapter",
         ))?
@@ -50,9 +48,7 @@ pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> 
 
 pub fn walmart_items_price(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("WM1'_items_price", dataset::pison_walmart())?
-        .add_target(BenchTarget::Rsonpath(
-            "$..bestMarketplacePrice.price",
-        ))?
+        .add_target(BenchTarget::Rsonpath("$..bestMarketplacePrice.price"))?
         .add_target(BenchTarget::JsonSki(
             "$.items[*].bestMarketplacePrice.price",
         ))?
@@ -76,9 +72,7 @@ pub fn walmart_items_name(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 pub fn wiki_claims_p150(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("WP1'_claims_p150", dataset::pison_wiki())?
-        .add_target(BenchTarget::Rsonpath(
-            "$..P150..mainsnak.property",
-        ))?
+        .add_target(BenchTarget::Rsonpath("$..P150..mainsnak.property"))?
         .add_target(BenchTarget::JsonSki(
             "$[*].claims.P150[*].mainsnak.property",
         ))?

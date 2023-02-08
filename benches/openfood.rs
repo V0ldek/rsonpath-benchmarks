@@ -19,7 +19,6 @@ pub fn vitamins_tags_descendant(c: &mut Criterion) -> Result<(), BenchmarkError>
     Ok(())
 }
 
-
 pub fn added_countries_tags(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("added_counties_tags", dataset::openfood())?
         .add_all_targets("$.products[*].added_countries_tags")?
@@ -42,9 +41,7 @@ pub fn added_countries_tags_descendant(c: &mut Criterion) -> Result<(), Benchmar
 
 pub fn specific_ingredients(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("specific_ingredients", dataset::openfood())?
-        .add_all_targets(
-            "$.products[*].specific_ingredients[*].ingredient",
-        )?
+        .add_all_targets("$.products[*].specific_ingredients[*].ingredient")?
         .finish();
 
     benchset.run(c);

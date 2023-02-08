@@ -50,12 +50,9 @@ pub fn orcid(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
-
 pub fn author_affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("author_affiliation", dataset::crossref(2))?
-        .add_all_targets(
-            "$.items[*].author[*].affiliation[*].name",
-        )?
+        .add_all_targets("$.items[*].author[*].affiliation[*].name")?
         .finish();
 
     benchset.run(c);
@@ -74,9 +71,7 @@ pub fn author_affiliation_descendant(c: &mut Criterion) -> Result<(), BenchmarkE
 }
 pub fn editor_affiliation(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("editor", dataset::crossref(2))?
-        .add_all_targets(
-            "$.items[*].editor[*].affiliation[*].name",
-        )?
+        .add_all_targets("$.items[*].editor[*].affiliation[*].name")?
         .finish();
     benchset.run(c);
     Ok(())
