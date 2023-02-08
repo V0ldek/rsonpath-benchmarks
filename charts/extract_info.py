@@ -82,7 +82,7 @@ def process_exp_data(data):
 def get_table():
     import texttable
     T=texttable.Texttable(max_width=0)
-    T.header(["dataset", "query", "rsonpath", "jsonski", "ratio"])
+    T.header(["dataset", "query", "rsonpath", "jsonski", "jsurfer", "rsonpath/jsonski", "rsonpath/jsurfer"])
     T.set_chars([' ', '|', '|', '-'])
     T.set_deco(texttable.Texttable.VLINES|texttable.Texttable.HEADER|texttable.Texttable.BORDER)
     return T
@@ -90,9 +90,16 @@ def get_table():
 def print_table_markdown(path:str):
     data = get_exp_data(path)
     processed = process_exp_data(data)
-    T = get_table()
+    L = []
     for e, v in processed.items():
         t = format_bench(e)
-        x, y = v["rsonpath"], v["jsonski"]
-        T.add_row((t[0],t[1], x, y, x/y))
-    return "\n".join(T.draw().split("\n")[1:-1])
+        x, y, z = v["rsonpath"], v.get("jsonski"), v.get("jsurfer")
+        r1 = x/y if y else 0
+        r2 = x/z if z else 0
+        L.append((t[0],t[1], x, y, z, r1, r2))
+
+    L.sort(key=lambda e:e[:2])
+    T = get_table()
+    for e in L:
+        T.add_row(e)
+    return "\n".join(T.draw().split("\n")[0:-1])
