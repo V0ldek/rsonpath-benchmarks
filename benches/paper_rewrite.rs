@@ -37,21 +37,6 @@ pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkErr
     Ok(())
 }
 
-pub fn google_map_routes(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("GMD1'_routes", dataset::pison_google_map())?
-        .add_target(BenchTarget::Rsonpath(
-            "$..steps[*].distance.text",
-        ))?
-        .add_target(BenchTarget::JsonSki(
-            "$[*].routes[*].legs[*].steps[*].distance.text",
-        ))?
-        .finish();
-
-    benchset.run(c);
-
-    Ok(())
-}
-
 pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("GMD2'_travel_modes", dataset::pison_google_map())?
         .add_target(BenchTarget::Rsonpath("$..available_travel_modes"))?
@@ -109,7 +94,6 @@ benchsets!(
     bestbuy_products_category,
     bestbuy_products_video,
     bestbuy_products_video_only,
-    google_map_routes,
     google_map_travel_modes,
     walmart_items_price,
     walmart_items_name,
