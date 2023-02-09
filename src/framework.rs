@@ -1,7 +1,7 @@
 use self::benchmark_options::BenchmarkOptions;
 use self::implementation::prepare;
 use crate::{
-    rsonpath::{Rsonpath, RsonpathError},
+    rsonpath::{Rsonpath, RsonpathError, RsonpathRecursive},
     rust_jsonski::{JsonSki, JsonSkiError},
     rust_jsurfer::{JSurfer, JSurferError},
 };
@@ -17,6 +17,7 @@ pub mod implementation;
 #[derive(Clone, Copy, Debug)]
 pub enum BenchTarget<'q> {
     Rsonpath(&'q str),
+    RsonpathRecursive(&'q str),
     JsonSki(&'q str),
     JSurfer(&'q str),
 }
@@ -97,11 +98,19 @@ impl Benchset {
 
     pub fn add_all_targets_except_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::Rsonpath(query))?
+            .add_target(BenchTarget::RsonpathRecursive(query))?
             .add_target(BenchTarget::JSurfer(query))
+    }
+
+    pub fn add_all_targets_except_jsurfer(self, query: &str) -> Result<Self, BenchmarkError> {
+        self.add_target(BenchTarget::Rsonpath(query))?
+            .add_target(BenchTarget::RsonpathRecursive(query))?
+            .add_target(BenchTarget::JsonSki(query))
     }
 
     pub fn add_all_targets(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::Rsonpath(query))?
+            .add_target(BenchTarget::RsonpathRecursive(query))?
             .add_target(BenchTarget::JsonSki(query))?
             .add_target(BenchTarget::JSurfer(query))
     }
@@ -120,6 +129,11 @@ impl<'a> Target for BenchTarget<'a> {
         match self {
             BenchTarget::Rsonpath(q) => {
                 let rsonpath = Rsonpath::new()?;
+                let prepared = prepare(rsonpath, file_path, q)?;
+                Ok(Box::new(prepared))
+            }
+            BenchTarget::RsonpathRecursive(q) => {
+                let rsonpath = RsonpathRecursive::new()?;
                 let prepared = prepare(rsonpath, file_path, q)?;
                 Ok(Box::new(prepared))
             }
