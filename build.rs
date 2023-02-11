@@ -1,4 +1,4 @@
-use eyre::{eyre, Result};
+use eyre::{eyre, Context, Result};
 use std::process::Command;
 use std::{error::Error, fs};
 
@@ -53,7 +53,7 @@ fn setup_jsurfer() -> Result<()> {
         ));
     }
 
-    let java_home = std::env::var("JAVA_HOME")?;
+    let java_home = std::env::var("JAVA_HOME").wrap_err("JAVA_HOME env variable not set")?;
     let jar_absolute_path =
         std::path::Path::new("./implementations/jsurferShim/lib/jsurferShim.jar").canonicalize()?;
 
