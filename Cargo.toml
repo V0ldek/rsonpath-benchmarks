@@ -33,6 +33,9 @@ rsonpath-lib = { version = "0.2.1", default-features = false }
 tar = "0.4.38"
 thiserror = "1.0.37"
 
+[patch.crates-io]
+rsonpath-lib = { path = "../rsonpath-lib" }
+
 [dev-dependencies]
 itertools = "0.10.3"
 regex = "1.6.0"
@@ -48,7 +51,6 @@ unique-labels = ["tail-skip", "rsonpath-lib/unique-labels"]
 [build-dependencies]
 cc = "1.0"
 eyre = "0.6.8"
-
 
 [[bench]]
 name = "ast"
