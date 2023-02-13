@@ -2,7 +2,8 @@ use crate::framework::implementation::Implementation;
 use ouroboros::self_referencing;
 use rsonpath_lib::engine::{main::MainEngine, recursive::RecursiveEngine};
 use rsonpath_lib::{
-    engine::{result::CountResult, Compiler, Engine, Input},
+    result::CountResult,
+    engine::{Compiler, Engine, Input},
     query::JsonPathQuery,
 };
 use std::fs;
