@@ -52,6 +52,13 @@ unique-labels = ["tail-skip", "rsonpath-lib/unique-labels"]
 cc = "1.0"
 eyre = "0.6.8"
 
+[profile.dev]
+lto = false
+
+[profile.release]
+lto = "thin"
+debug = 1
+
 [[bench]]
 name = "ast"
 harness = false
