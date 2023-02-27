@@ -312,9 +312,10 @@ pub const fn ast() -> Dataset {
 
 pub fn crossref(size: u32) -> Dataset {
     let source = DatasetSource::UrlTarArchive(
+        
         DatasetArchive {
-            url: "https://zenodo.org/record/7343312/files/crossref.tar.gz",
-            checksum: hex!("eddb87d1cf7490974236c3ba68a0e4237189aec4b9c27befd020d6e24d45c1db"),
+            url: "https://zenodo.org/record/7682834/files/crossref.tar.gz",
+            checksum: hex!("289dcddb692c7b35e626a295287e4f35b5f508a37ead87b6404ab0693b1ce5dc")
         },
         dataset_path!(""),
     );
@@ -336,7 +337,7 @@ pub fn crossref(size: u32) -> Dataset {
             name: "crossref2",
             path: dataset_path!("crossref/crossref2.json"),
             source,
-            checksum: hex!("6c452a0ee33a0fc9c98e6830e6fb411e3f4736507977c0e96ec3027488b4c95f"),
+            checksum: hex!("7827cbbce7b32e44f90d0f9ad8633780ada0ec53177f7f62655f3de26fe6d1c4"),
         },
         4 => Dataset {
             name: "crossref4",

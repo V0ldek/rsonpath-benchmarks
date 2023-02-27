@@ -38,7 +38,7 @@ def print_plot(rsonpath, jsurfer, jsonski, exp_label, fileout="plot.png"):
     plot.savefig("plot.png")
     
 def plot_from_dataframe(df, keys=None, width=0.8, colors=dict(simdpath="tab:blue", jsonski="tab:red", rewritten="tab:green")):
-    keys = sorted(df) if not keys else keys
+    keys = list(df) if not keys else keys
     plot.rcParams.update({
     "font.size": 28,
     "axes.facecolor": "whitesmoke",
@@ -66,8 +66,9 @@ def plot_from_dataframe(df, keys=None, width=0.8, colors=dict(simdpath="tab:blue
 
 def generate_graphs(path, outpath):
     import charts.extract_info as ei
-    df = ei.exp_to_dataframe(path).set_index("id")[["rsonpath", "jsonski"]].rename(dict(rsonpath="simdpath"), axis=1)
-    df.to_csv(outpath+"/data.csv")
+    df0 = ei.exp_to_dataframe(path).set_index("id")
+    df0.to_csv(outpath+"/data.csv")
+    df = df0[["jsonski", "rsonpath"]].rename(dict(rsonpath="simdpath"), axis=1)
 
     df1 = df.filter(items=ei.jsonski_vs_rsonpath, axis=0).drop("N1")
     fig = plot_from_dataframe(df1)

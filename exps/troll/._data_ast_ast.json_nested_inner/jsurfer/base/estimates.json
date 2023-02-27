@@ -1,1 +1,3 @@
-{"mean":{"confidence_interval":{"confidence_level":0.95,"lower_bound":183501335.845125,"upper_bound":184707495.07},"point_estimate":184065875.15,"standard_error":307800.4008061282},"median":{"confidence_interval":{"confidence_level":0.95,"lower_bound":182777802.5,"upper_bound":183768292.25},"point_estimate":183110217.75,"standard_error":287854.61480152624},"median_abs_dev":{"confidence_interval":{"confidence_level":0.95,"lower_bound":1524092.0165419579,"upper_bound":2655755.387350917},"point_estimate":1905805.5416151881,"standard_error":296331.14446148096},"slope":null,"std_dev":{"confidence_interval":{"confidence_level":0.95,"lower_bound":2140915.756369583,"upper_bound":3918361.254096198},"point_estimate":3090763.5135195525,"standard_error":453387.446798849}}
+version https://git-lfs.github.com/spec/v1
+oid sha256:7577e83a1bdfc32e084391b89a3024b30534b948e7a4657c465c7a18fe21602c
+size 770
