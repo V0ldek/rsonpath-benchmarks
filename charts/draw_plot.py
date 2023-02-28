@@ -43,9 +43,12 @@ def plot_from_dataframe(df,
 	 keys=None,
 	 width=0.8,
 	 colors=dict(simdpath="tab:blue",
-	 jsonski="tab:red",
-	 rewritten="tab:green"),
-	 labels = dict(rewritten="simdpath (rewritten)")):
+    	 jsonski="tab:red",
+	     rewritten_s="tab:green",
+         jsurfer="tab:gray",
+         rewritten_j="tab:brown"
+     ),
+	 labels = dict(rewritten_s="simdpath (rewritten)", rewritten_j="jsurfer (rewritten)")):
 
     keys = list(df) if not keys else keys
     plot.rcParams.update({
@@ -74,30 +77,41 @@ def plot_from_dataframe(df,
     box = ax.get_position()
     q = math.ceil(len(keys)/2)
     hfactor = 1-q*0.1
-    hanchor = 1+q*0.1
+    hanchor = 1.1+q*0.1
     ax.set_position([box.x0, box.y0, box.width, box.height*hfactor])
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, hanchor),
-          ncol=2, fancybox=True, shadow=True)
+          ncol=2)
     fig.tight_layout()
     return fig
 
-def generate_graphs(path, outpath):
+def generate_graphs_csv(path, output):
+    import pandas as pd
+    df0 = pd.read_csv(path).set_index("id")
+    generate_graphs(df0, output)
+
+def generate_graphs_exp(path, outpath):
     import charts.extract_info as ei
     df0 = ei.exp_to_dataframe(path).set_index("id")
     df0.to_csv(outpath+"/data.csv")
-    df = df0[["jsonski", "rsonpath"]].rename(dict(rsonpath="simdpath"), axis=1)
+    generate_graphs(df0, outpath)
 
-    df1 = df.filter(items=ei.jsonski_vs_rsonpath, axis=0).drop("N1")
+def generate_graphs(df0, outpath):
+    import charts.extract_info as ei
+
+    df = df0[["jsurfer", "jsonski", "rsonpath"]].rename(dict(rsonpath="simdpath"), axis=1).drop("N1")
+
+    df1 = df.filter(items=ei.jsonski_vs_rsonpath, axis=0)
     fig = plot_from_dataframe(df1)
     fig.savefig(outpath+"/simdpath_vs_jsonski.png", bbox_inches='tight')
 
     query_orig = list(map(lambda e:e[:-1], ei.query_rewritten))
     df2 = df.filter(items=query_orig, axis=0)
-    df3 = df.filter(items=ei.query_rewritten, axis=0)[["simdpath"]]
-    df2["rewritten"] = df3.rename(lambda e:e[:-1])
+    df3 = df.filter(items=ei.query_rewritten, axis=0)[["simdpath", "jsurfer"]]
+    df2[["rewritten_s", "rewritten_j"]] = df3.rename(lambda e:e[:-1])
+    df2 = df2[["jsurfer", "rewritten_j", "jsonski", "simdpath", "rewritten_s"]]
     fig = plot_from_dataframe(df2)
     fig.savefig(outpath+"/query_rewritten.png", bbox_inches='tight')
 
-    df4 = df.filter(items=ei.query_interest, axis=0)[["simdpath"]] 
+    df4 = df.filter(items=ei.query_interest, axis=0)[["jsonski", "simdpath"]] 
     fig = plot_from_dataframe(df4)
     fig.savefig(outpath+"/query_interest.png", bbox_inches='tight')
