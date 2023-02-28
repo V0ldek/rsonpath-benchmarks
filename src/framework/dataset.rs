@@ -310,12 +310,13 @@ pub const fn ast() -> Dataset {
     }
 }
 
+
 pub fn crossref(size: u32) -> Dataset {
     let source = DatasetSource::UrlTarArchive(
         
         DatasetArchive {
-            url: "https://zenodo.org/record/7682834/files/crossref.tar.gz",
-            checksum: hex!("289dcddb692c7b35e626a295287e4f35b5f508a37ead87b6404ab0693b1ce5dc")
+            url: "https://zenodo.org/record/7683117/files/crossref.tar.gz",
+            checksum: hex!("ffd5de82d757e0cbd22aa6aca9095d21e5e5c2835c5770f9e446f41b085fc890")
         },
         dataset_path!(""),
     );
@@ -325,25 +326,25 @@ pub fn crossref(size: u32) -> Dataset {
             name: "crossref0",
             path: dataset_path!("crossref/crossref0.json"),
             source,
-            checksum: hex!("db314fb19b527d5aa4e0e7d2b05c45d183af0f0aed8af285ce20c044e9789943"),
+            checksum: hex!("9ef2b42a76e2d3e3785dd60f1d0c82a6986a33960d540225fcf19a4531addd0f"),
         },
         1 => Dataset {
             name: "crossref1",
             path: dataset_path!("crossref/crossref1.json"),
             source,
-            checksum: hex!("723527cbf9b642cb7cb63cd877496f72115a76a36b4c86814f2776d6950fcc48"),
+            checksum: hex!("b88ae1fd6e72c963859128c23dc7198921a7f3d422d0fe0b4ab72ae1a940f035"),
         },
         2 => Dataset {
             name: "crossref2",
             path: dataset_path!("crossref/crossref2.json"),
             source,
-            checksum: hex!("7827cbbce7b32e44f90d0f9ad8633780ada0ec53177f7f62655f3de26fe6d1c4"),
+            checksum: hex!("6c452a0ee33a0fc9c98e6830e6fb411e3f4736507977c0e96ec3027488b4c95f"),
         },
         4 => Dataset {
             name: "crossref4",
             path: dataset_path!("crossref/crossref4.json"),
             source,
-            checksum: hex!("d47b65922745e8ac02d52483692682fc79de56f13d1c7a5cd4c98237f6c394e9"),
+            checksum: hex!("7c5768298eb2c90ccc59b0204477f22c27d91ebcd37ea477c307600b3e0e8c29"),
         },
         _ => panic!("unsupported dataset crossref{size}"),
     }

@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plot
 import numpy as np
+import math
+
 plot.rcParams.update({
     "font.size": 18,
     "axes.facecolor": "whitesmoke",
@@ -37,7 +39,14 @@ def print_plot(rsonpath, jsurfer, jsonski, exp_label, fileout="plot.png"):
     plot.subplots_adjust(wspace=0.2, left=0.06)
     plot.savefig("plot.png")
     
-def plot_from_dataframe(df, keys=None, width=0.8, colors=dict(simdpath="tab:blue", jsonski="tab:red", rewritten="tab:green")):
+def plot_from_dataframe(df,
+	 keys=None,
+	 width=0.8,
+	 colors=dict(simdpath="tab:blue",
+	 jsonski="tab:red",
+	 rewritten="tab:green"),
+	 labels = dict(rewritten="simdpath (rewritten)")):
+
     keys = list(df) if not keys else keys
     plot.rcParams.update({
     "font.size": 28,
@@ -45,6 +54,8 @@ def plot_from_dataframe(df, keys=None, width=0.8, colors=dict(simdpath="tab:blue
     "font.family": "serif",
     "figure.figsize":(20, 5)
     })
+
+    lab_f = lambda e:labels.get(e, e)
 
     pos = np.array(range(len(df.index)))
     fig, ax = plot.subplots()
@@ -54,13 +65,19 @@ def plot_from_dataframe(df, keys=None, width=0.8, colors=dict(simdpath="tab:blue
     ax.set_xticklabels(df.index)
     ax.set_ylabel("GB/s")
     if len(keys) == 1:
-        ax.bar(pos, df[keys[0]], width=width, zorder=4, label=keys[0], color=colors[keys[0]])
+        ax.bar(pos, df[keys[0]], width=width, zorder=4, label=lab_f(keys[0]), color=colors[keys[0]])
     else: 
         w = width/len(keys)
         for i, k in enumerate(keys):
             npos = pos + (len(keys)-1)*w*((i/(len(keys)-1))-0.5)
-            ax.bar(npos, df[k], width=w, zorder=4, label=k, color=colors[k])
-    ax.legend()
+            ax.bar(npos, df[k], width=w, zorder=4, label=lab_f(k), color=colors[k])
+    box = ax.get_position()
+    q = math.ceil(len(keys)/2)
+    hfactor = 1-q*0.1
+    hanchor = 1+q*0.1
+    ax.set_position([box.x0, box.y0, box.width, box.height*hfactor])
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, hanchor),
+          ncol=2, fancybox=True, shadow=True)
     fig.tight_layout()
     return fig
 
@@ -72,15 +89,15 @@ def generate_graphs(path, outpath):
 
     df1 = df.filter(items=ei.jsonski_vs_rsonpath, axis=0).drop("N1")
     fig = plot_from_dataframe(df1)
-    fig.savefig(outpath+"/simdpath_vs_jsonski.png")
+    fig.savefig(outpath+"/simdpath_vs_jsonski.png", bbox_inches='tight')
 
     query_orig = list(map(lambda e:e[:-1], ei.query_rewritten))
     df2 = df.filter(items=query_orig, axis=0)
     df3 = df.filter(items=ei.query_rewritten, axis=0)[["simdpath"]]
     df2["rewritten"] = df3.rename(lambda e:e[:-1])
     fig = plot_from_dataframe(df2)
-    fig.savefig(outpath+"/query_rewritten.png")
+    fig.savefig(outpath+"/query_rewritten.png", bbox_inches='tight')
 
     df4 = df.filter(items=ei.query_interest, axis=0)[["simdpath"]] 
     fig = plot_from_dataframe(df4)
-    fig.savefig(outpath+"/query_interest.png")
+    fig.savefig(outpath+"/query_interest.png", bbox_inches='tight')
