@@ -36,7 +36,6 @@ pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkErr
 pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("GMD2'_travel_modes", dataset::pison_google_map())?
         .add_target(BenchTarget::Rsonpath("$..available_travel_modes"))?
-        .add_target(BenchTarget::JSurfer("$..available_travel_modes"))?
         .finish();
 
     benchset.run(c);
@@ -69,7 +68,6 @@ pub fn walmart_items_name(c: &mut Criterion) -> Result<(), BenchmarkError> {
 pub fn wiki_claims_p150(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("WP1'_claims_p150", dataset::pison_wiki())?
         .add_target(BenchTarget::Rsonpath("$..P150..mainsnak.property"))?
-        .add_target(BenchTarget::JSurfer("$..P150..mainsnak.property"))?
         .finish();
 
     benchset.run(c);
