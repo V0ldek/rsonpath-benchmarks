@@ -98,20 +98,17 @@ impl Benchset {
 
     pub fn add_all_targets_except_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::Rsonpath(query))?
-            .add_target(BenchTarget::RsonpathRecursive(query))?
             .add_target(BenchTarget::JSurfer(query))
     }
 
     pub fn add_all_targets_except_jsurfer(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::Rsonpath(query))?
-            .add_target(BenchTarget::RsonpathRecursive(query))?
             .add_target(BenchTarget::JsonSki(query))
     }
 
     pub fn add_all_targets(self, query: &str) -> Result<Self, BenchmarkError> {
-        self.add_target(BenchTarget::Rsonpath(query))?
-            .add_target(BenchTarget::RsonpathRecursive(query))?
-            .add_target(BenchTarget::JsonSki(query))?
+        self.add_target(BenchTarget::JsonSki(query))?
+            .add_target(BenchTarget::Rsonpath(query))?
             .add_target(BenchTarget::JSurfer(query))
     }
 

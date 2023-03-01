@@ -76,6 +76,10 @@ name = "paper_parity"
 harness = false
 
 [[bench]]
+name = "paper_parity_jsurfer"
+harness = false
+
+[[bench]]
 name = "paper_rewrite"
 harness = false
 
