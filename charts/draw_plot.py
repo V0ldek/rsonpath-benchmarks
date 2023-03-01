@@ -45,10 +45,11 @@ def plot_from_dataframe(df,
 	 colors=dict(simdpath="tab:blue",
     	 jsonski="tab:red",
 	     rewritten_s="tab:green",
+	     rewritten_s2="tab:olive",
          jsurfer="tab:gray",
          rewritten_j="tab:brown"
      ),
-	 labels = dict(rewritten_s="simdpath (rewritten)", rewritten_j="jsurfer (rewritten)")):
+	 labels = dict(rewritten_s="simdpath (rewritten)", rewritten_s2="simdpath (partial)", rewritten_j="jsurfer (rewritten)")):
 
     keys = list(df) if not keys else keys
     plot.rcParams.update({
@@ -79,6 +80,10 @@ def plot_from_dataframe(df,
         hfactor = 0.9
         hanchor = 1.2
         ncol = 3
+    elif len(keys) == 4:
+        hfactor = 0.9
+        hanchor = 1.35
+        ncol = 2
     else:
         hfactor = 0.8
         hanchor = 1.45
@@ -117,10 +122,25 @@ def generate_graphs(df0, outpath):
     fig = plot_from_dataframe(df2)
     fig.savefig(outpath+"/query_rewritten.png", bbox_inches='tight')
 
-    df4 = df.filter(items=ei.query_interest, axis=0)[["jsonski", "simdpath"]] 
-    jsonski = df4[["jsonski"]]
-    for i in ("Ts2", "Ts3"):
-        jsonski = jsonski.drop(i)
-    df4["jsonski"] = jsonski
+    
+    query = ["C2", "C3", "Ts"]
+    query_rewritten = [
+        "A1",
+        "A2",
+        "C1",
+        "C2r",
+        "C3r",
+        "Tsr",
+    ]
+    query_partial = ["Tsp"]
+    df4 = df.filter(items=query_rewritten, axis=0)[["simdpath"]].rename(lambda e:e[:-1] if e[-1] == "r" else e)
+    df4[["rewritten_s"]] = df4[["simdpath"]]
+    df5 = df.filter(items=query, axis=0)[["jsonski", "simdpath"]] 
+    df4[["jsonski", "simdpath"]] = df5
+    df6 = df.filter(items=query_partial, axis=0)[["simdpath"]].rename(lambda e:"Ts")
+    df4[["rewritten_s2"]] = df6
+    df4 = df4[["jsonski", "simdpath", "rewritten_s", "rewritten_s2"]]
+    #for i in ("Ts2", "Ts3"):
+    #    jsonski = jsonski.drop(i)
     fig = plot_from_dataframe(df4)
     fig.savefig(outpath+"/query_interest.png", bbox_inches='tight')

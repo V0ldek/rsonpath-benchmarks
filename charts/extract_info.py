@@ -136,9 +136,9 @@ id_map = {
     "vitamins_tags_descendant" : "O1r",
     "all_hashtags" : "Ts4",
     "hashtags_of_retweets" : "Ts5",
-    "metadata_1" : "Ts1",
-    "metadata_2" : "Ts2",
-    "metadata_3" : "Ts3",
+    "metadata_1" : "Ts",
+    "metadata_2" : "Tsp",
+    "metadata_3" : "Tsr",
     "TT1_entities_urls" : "T1",
     "TT2_text" : "T2",
     "WM1_items_price" : "W1",
@@ -185,9 +185,9 @@ id_queries = {
     "O1r": "$..vitamins_tags",
     "Ts4": "$..hashtags..text",
     "Ts5": "$..retweeted_status..hashtags..text",
-    "Ts1": "$.search_metadata.count",
-    "Ts2": "$..search_metadata.count",
-    "Ts3": "$..count",
+    "Ts": "$.search_metadata.count",
+    "Tsp": "$..search_metadata.count",
+    "Tsr": "$..count",
     "T1": "$[*].entities.urls[*].url",
     "T2": "$[*].text",
     "W1": "$.items[*].bestMarketplacePrice.price",
@@ -234,11 +234,11 @@ queries_results = {
     "S4": 221443,
     "T1": 88881,
     "T2": 150135,
-    "Ts1": 10,
-    "Ts2": 2,
-    "Ts3": 1,
-    "Ts4": 1,
-    "Ts5": 1,
+    "Ts4": 10,
+    "Ts5": 2,
+    "Ts": 1,
+    "Tsp": 1,
+    "Tsr": 1,
     "W1": 15892,
     "W1r": 15892,
     "W2": 272499,
@@ -272,14 +272,6 @@ query_rewritten = [
     "Wir"
 ]
 
-query_interest = [
-    "A1",
-    "A2",
-    "C1",
-    "C2",
-    "C3",
-    "Ts",
-]
 
 def get_table():
     import texttable
