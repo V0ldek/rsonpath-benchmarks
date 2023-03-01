@@ -80,6 +80,7 @@ def process_exp_data(data):
             h[x] = size/median #(size/(median+stdev), size/median, size/(median-stdev))
     return d2
 
+header = ["id", "rsonpath_id", "dataset", "query", "count", "rsonpath", "jsonski", "jsurfer"]
 
 def exp_to_list(path:str):
     data = get_exp_data(path)
@@ -92,12 +93,12 @@ def exp_to_list(path:str):
         x, y, z = v["rsonpath"], v.get("jsonski"), v.get("jsurfer")
         qid = id_map[t[1]]
         query = id_queries[qid]     
-        L.append((qid, t[1], t[0], query, x, y, z))
+        count = queries_results[qid]
+        L.append((qid, t[1], t[0], query, count, x, y, z))
 
     L.sort(key=lambda e:e[:2])
     return L
 
-header = ["id", "rsonpath_id", "dataset", "query", "rsonpath", "jsonski", "jsurfer"]
 
 id_map = {
     "decl_name" : "A1",
@@ -133,11 +134,11 @@ id_map = {
     "specific_ingredients_descendant" : "O3r",
     "vitamins_tags" : "O1",
     "vitamins_tags_descendant" : "O1r",
-    "all_hashtags" : "Ts1",
-    "hashtags_of_retweets" : "Ts2",
-    "metadata_1" : "Ts3",
-    "metadata_2" : "Ts4",
-    "metadata_3" : "Ts5",
+    "all_hashtags" : "Ts4",
+    "hashtags_of_retweets" : "Ts5",
+    "metadata_1" : "Ts1",
+    "metadata_2" : "Ts2",
+    "metadata_3" : "Ts3",
     "TT1_entities_urls" : "T1",
     "TT2_text" : "T2",
     "WM1_items_price" : "W1",
@@ -182,11 +183,11 @@ id_queries = {
     "O3r": "$..specific_ingredients..ingredient",
     "O1": "$.products[*].vitamins_tags",
     "O1r": "$..vitamins_tags",
-    "Ts1": "$..hashtags..text",
-    "Ts2": "$..retweeted_status..hashtags..text",
-    "Ts3": "$.search_metadata.count",
-    "Ts4": "$..search_metadata.count",
-    "Ts5": "$..count",
+    "Ts4": "$..hashtags..text",
+    "Ts5": "$..retweeted_status..hashtags..text",
+    "Ts1": "$.search_metadata.count",
+    "Ts2": "$..search_metadata.count",
+    "Ts3": "$..count",
     "T1": "$[*].entities.urls[*].url",
     "T2": "$[*].text",
     "W1": "$.items[*].bestMarketplacePrice.price",
@@ -195,6 +196,55 @@ id_queries = {
     "W2r": "$..name",
     "Wi": "$[*].claims.P150[*].mainsnak.property",
     "Wir": "$..P150..mainsnak.property"
+}
+
+queries_results = {
+    "A1": 35,
+    "A2": 78129,
+    "A3": 482,
+    "B1": 697440,
+    "B1r": 697440,
+    "B2": 8857,
+    "B2r": 8857,
+    "B3": 769,
+    "B3r": 769,
+    "C0": 1073589,
+    "C1": 64495,
+    "C1r": 64495,
+    "C2": 39,
+    "C2r": 39,
+    "C3": 93407,
+    "C3r": 93407,
+    "C4": 18401,
+    "C4r": 18401,
+    "G1": 1716752,
+    "G2": 90,
+    "G2r": 90,
+    "N1": 44,
+    "N2": 8774410,
+    "O1": 24,
+    "O1r": 24,
+    "O2": 24,
+    "O2r": 24,
+    "O3": 5,
+    "O3r": 5,
+    "S0": 38352,
+    "S1": 64535,
+    "S2": 116187,
+    "S4": 221443,
+    "T1": 88881,
+    "T2": 150135,
+    "Ts1": 10,
+    "Ts2": 2,
+    "Ts3": 1,
+    "Ts4": 1,
+    "Ts5": 1,
+    "W1": 15892,
+    "W1r": 15892,
+    "W2": 272499,
+    "W2r": 272499,
+    "Wi": 15603,
+    "Wir": 15603
 }
 
 jsonski_vs_rsonpath = [
@@ -229,9 +279,9 @@ query_interest = [
     "C1r",
     "C2",
     "C2r",
-    "Ts3",
-    "Ts4",
-    "Ts5"
+    "Ts1",
+    "Ts2",
+    "Ts3"
 ]
 
 def get_table():

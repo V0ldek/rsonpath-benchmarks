@@ -66,7 +66,6 @@ def plot_from_dataframe(df,
     ax.grid(color = 'white', linestyle = '-', linewidth = 3, zorder=1)
     ax.set_xticks(pos)
     ax.set_xticklabels(df.index)
-    ax.set_ylabel("GB/s")
     if len(keys) == 1:
         ax.bar(pos, df[keys[0]], width=width, zorder=4, label=lab_f(keys[0]), color=colors[keys[0]])
     else: 
@@ -75,12 +74,18 @@ def plot_from_dataframe(df,
             npos = pos + (len(keys)-1)*w*((i/(len(keys)-1))-0.5)
             ax.bar(npos, df[k], width=w, zorder=4, label=lab_f(k), color=colors[k])
     box = ax.get_position()
-    q = math.ceil(len(keys)/2)
-    hfactor = 1-q*0.1
-    hanchor = 1.1+q*0.1
+    q = math.ceil(len(keys)/3)
+    if len(keys) < 4:
+        hfactor = 0.9
+        hanchor = 1.2
+        ncol = 3
+    else:
+        hfactor = 0.8
+        hanchor = 1.45
+        ncol = 2
     ax.set_position([box.x0, box.y0, box.width, box.height*hfactor])
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, hanchor),
-          ncol=2)
+          ncol=ncol)
     fig.tight_layout()
     return fig
 
