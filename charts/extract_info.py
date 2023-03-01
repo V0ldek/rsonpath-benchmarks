@@ -277,12 +277,8 @@ query_interest = [
     "A2",
     "C1",
     "C2",
-    "C2r",
     "C3",
-    "C3r",
-    "Ts1",
-    "Ts2",
-    "Ts3"
+    "Ts",
 ]
 
 def get_table():
