@@ -118,5 +118,9 @@ def generate_graphs(df0, outpath):
     fig.savefig(outpath+"/query_rewritten.png", bbox_inches='tight')
 
     df4 = df.filter(items=ei.query_interest, axis=0)[["jsonski", "simdpath"]] 
+    jsonski = df4[["jsonski"]]
+    for i in ("Ts2", "Ts3"):
+        jsonski = jsonski.drop(i)
+    df4["jsonski"] = jsonski
     fig = plot_from_dataframe(df4)
     fig.savefig(outpath+"/query_interest.png", bbox_inches='tight')
