@@ -68,6 +68,10 @@ name = "crossref"
 harness = false
 
 [[bench]]
+name = "main"
+harness = false
+
+[[bench]]
 name = "openfood"
 harness = false
 

@@ -1,5 +1,5 @@
-use self::benchmark_options::BenchmarkOptions;
 use self::implementation::prepare;
+use self::{benchmark_options::BenchmarkOptions, implementation::prepare_with_id};
 use crate::{
     rsonpath::{Rsonpath, RsonpathError, RsonpathRecursive},
     rust_jsonski::{JsonSki, JsonSkiError},
@@ -96,6 +96,16 @@ impl Benchset {
         Ok(self)
     }
 
+    pub fn add_target_with_id(
+        mut self,
+        target: BenchTarget<'_>,
+        id: &'static str,
+    ) -> Result<Self, BenchmarkError> {
+        let bench_fn = target.to_bench_fn_with_id(&self.json_document.file_path, id)?;
+        self.implementations.push(bench_fn);
+        Ok(self)
+    }
+
     pub fn add_all_targets_except_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::Rsonpath(query))?
             .add_target(BenchTarget::RsonpathRecursive(query))?
@@ -122,6 +132,12 @@ impl Benchset {
 
 trait Target {
     fn to_bench_fn(self, file_path: &str) -> Result<Box<dyn BenchFn>, BenchmarkError>;
+
+    fn to_bench_fn_with_id(
+        self,
+        file_path: &str,
+        id: &'static str,
+    ) -> Result<Box<dyn BenchFn>, BenchmarkError>;
 }
 
 impl<'a> Target for BenchTarget<'a> {
@@ -149,6 +165,35 @@ impl<'a> Target for BenchTarget<'a> {
             }
         }
     }
+
+    fn to_bench_fn_with_id(
+        self,
+        file_path: &str,
+        id: &'static str,
+    ) -> Result<Box<dyn BenchFn>, BenchmarkError> {
+        match self {
+            BenchTarget::Rsonpath(q) => {
+                let rsonpath = Rsonpath::new()?;
+                let prepared = prepare_with_id(rsonpath, id, file_path, q)?;
+                Ok(Box::new(prepared))
+            }
+            BenchTarget::RsonpathRecursive(q) => {
+                let rsonpath = RsonpathRecursive::new()?;
+                let prepared = prepare_with_id(rsonpath, id, file_path, q)?;
+                Ok(Box::new(prepared))
+            }
+            BenchTarget::JsonSki(q) => {
+                let jsonski = JsonSki::new()?;
+                let prepared = prepare_with_id(jsonski, id, file_path, q)?;
+                Ok(Box::new(prepared))
+            }
+            BenchTarget::JSurfer(q) => {
+                let jsurfer = JSurfer::new()?;
+                let prepared = prepare_with_id(jsurfer, id, file_path, q)?;
+                Ok(Box::new(prepared))
+            }
+        }
+    }
 }
 
 trait BenchFn {
@@ -159,7 +204,7 @@ trait BenchFn {
 
 impl<I: Implementation> BenchFn for PreparedQuery<I> {
     fn id(&self) -> &str {
-        I::id()
+        self.id
     }
 
     fn run(&self) -> u64 {

@@ -16,6 +16,7 @@ pub trait Implementation: Sized {
 
 pub struct PreparedQuery<I: Implementation> {
     pub(crate) implementation: I,
+    pub(crate) id: &'static str,
     pub(crate) query: I::Query,
     pub(crate) file: I::File,
 }
@@ -25,11 +26,21 @@ pub(crate) fn prepare<I: Implementation>(
     file_path: &str,
     query: &str,
 ) -> Result<PreparedQuery<I>, I::Error> {
+    prepare_with_id(implementation, I::id(), file_path, query)
+}
+
+pub(crate) fn prepare_with_id<I: Implementation>(
+    implementation: I,
+    id: &'static str,
+    file_path: &str,
+    query: &str,
+) -> Result<PreparedQuery<I>, I::Error> {
     let query = implementation.compile_query(query)?;
     let file = implementation.load_file(file_path)?;
 
     Ok(PreparedQuery {
         implementation,
+        id,
         query,
         file,
     })
