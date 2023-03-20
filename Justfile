@@ -40,7 +40,7 @@ bench-all: (build-bench)
     cargo bench --package rsonpath-benchmarks
 
 # Run a given bench target.
-bench target="paper_parity": (build-bench)
+bench target="main": (build-bench)
     cargo bench --package rsonpath-benchmarks --bench {{target}}
 
 # === CLEAN ===

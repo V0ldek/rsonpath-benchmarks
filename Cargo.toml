@@ -23,7 +23,7 @@ eyre = "0.6.8"
 flate2 = "1.0.25"
 hex-literal = "0.3.4"
 indicatif = "0.17.3"
-jni = { version = "0.19.0", features = ["invocation", "default"] }
+jni = { version = "0.21.1", features = ["invocation", "default"] }
 libc = "0.2.126"
 lazy_static = "1.4.0"
 sha2 = "0.10.6"
