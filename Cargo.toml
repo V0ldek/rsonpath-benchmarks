@@ -4,7 +4,7 @@ authors = [
     "Mateusz Gienieczko <mat@gienieczko.com>",
     "Charles Paperman <charles.paperman@inria.fr>",
 ]
-version = "0.3.2"
+version = "0.3.3"
 edition = "2021"
 description = "Benchmark suite for the `rsonpath` project."
 readme = "./README.md"
@@ -29,7 +29,7 @@ lazy_static = "1.4.0"
 sha2 = "0.10.6"
 ouroboros = "0.15.5"
 reqwest = { version = "0.11.14", features = ["blocking"] }
-rsonpath-lib = { version = "0.3.2", default-features = false }
+rsonpath-lib = { version = "0.3.3", default-features = false }
 tar = "0.4.38"
 thiserror = "1.0.37"
 
