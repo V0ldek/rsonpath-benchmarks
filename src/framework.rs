@@ -1,5 +1,6 @@
 use self::implementation::prepare;
 use self::{benchmark_options::BenchmarkOptions, implementation::prepare_with_id};
+use crate::jsonpath_rust::{JsonpathRust, JsonpathRustError};
 use crate::{
     rsonpath::{Rsonpath, RsonpathError, RsonpathRecursive},
     rust_jsonski::{JsonSki, JsonSkiError},
@@ -20,6 +21,7 @@ pub enum BenchTarget<'q> {
     RsonpathRecursive(&'q str),
     JsonSki(&'q str),
     JSurfer(&'q str),
+    JsonpathRust(&'q str),
 }
 
 pub struct Benchset {
@@ -163,6 +165,11 @@ impl<'a> Target for BenchTarget<'a> {
                 let prepared = prepare(jsurfer, file_path, q)?;
                 Ok(Box::new(prepared))
             }
+            BenchTarget::JsonpathRust(q) => {
+                let jsonpath_rust = JsonpathRust::new()?;
+                let prepared = prepare(jsonpath_rust, file_path, q)?;
+                Ok(Box::new(prepared))
+            }
         }
     }
 
@@ -190,6 +197,11 @@ impl<'a> Target for BenchTarget<'a> {
             BenchTarget::JSurfer(q) => {
                 let jsurfer = JSurfer::new()?;
                 let prepared = prepare_with_id(jsurfer, id, file_path, q)?;
+                Ok(Box::new(prepared))
+            }
+            BenchTarget::JsonpathRust(q) => {
+                let jsonpath_rust = JsonpathRust::new()?;
+                let prepared = prepare_with_id(jsonpath_rust, id, file_path, q)?;
                 Ok(Box::new(prepared))
             }
         }
@@ -239,5 +251,11 @@ pub enum BenchmarkError {
         #[source]
         #[from]
         JSurferError,
+    ),
+    #[error("error preparing JsonpathRust bench: {0}")]
+    JsonpathRust(
+        #[source]
+        #[from]
+        JsonpathRustError,
     ),
 }

@@ -1,7 +1,7 @@
 pub trait Implementation: Sized {
     type Query;
     type File;
-    type Error: std::error::Error;
+    type Error: std::error::Error + Sync + Send + 'static;
 
     fn id() -> &'static str;
 
