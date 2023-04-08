@@ -6,7 +6,7 @@ use rsonpath_lib::{
     engine::{Compiler, Engine, Input},
     query::JsonPathQuery,
 };
-use std::fs;
+use std::{fs, io};
 use thiserror::Error;
 
 pub struct Rsonpath {}
@@ -102,7 +102,7 @@ impl Implementation for RsonpathRecursive {
 }
 
 fn rsonpath_load_file(file_path: &str) -> Result<Input, RsonpathError> {
-    let mut contents = fs::read_to_string(file_path).expect("Reading from file failed.");
+    let mut contents = fs::read_to_string(file_path)?;
     let input = Input::new(&mut contents);
 
     Ok(input)
@@ -114,6 +114,8 @@ pub enum RsonpathError {
     CompilerError(#[from] rsonpath_lib::query::error::CompilerError),
     #[error(transparent)]
     EngineError(#[from] rsonpath_lib::engine::error::EngineError),
+    #[error(transparent)]
+    IoError(#[from] io::Error),
     #[error("something happened")]
     Unknown(),
 }

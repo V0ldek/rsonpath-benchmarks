@@ -16,20 +16,29 @@ repository = "https://github.com/V0ldek/rsonpath-benchmarks"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[bin]]
+path = "src/main.rs"
+name = "pathimpl"
+
 [dependencies]
 cfg-if = "1.0.0"
+clap = { version = "4.1.11", features = ["derive", "wrap_help"] }
+color-eyre = { version = "0.6.2", default-features = false }
 criterion = "0.4.0"
 eyre = "0.6.8"
 flate2 = "1.0.25"
-hex-literal = "0.3.4"
+hex-literal = "0.4.0"
 indicatif = "0.17.3"
 jni = { version = "0.21.1", features = ["invocation", "default"] }
+jsonpath-rust = "0.2.6"
 libc = "0.2.126"
 lazy_static = "1.4.0"
+serde_json = "1.0.95"
 sha2 = "0.10.6"
 ouroboros = "0.15.5"
 reqwest = { version = "0.11.14", features = ["blocking"] }
 rsonpath-lib = { version = "0.3.3", default-features = false }
+serde_json_path = "0.6.0"
 tar = "0.4.38"
 thiserror = "1.0.37"
 
@@ -85,6 +94,10 @@ harness = false
 
 [[bench]]
 name = "rsonpath_query_compilation"
+harness = false
+
+[[bench]]
+name = "rust_native"
 harness = false
 
 [[bench]]
