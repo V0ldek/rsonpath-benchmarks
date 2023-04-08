@@ -1,10 +1,11 @@
 use self::implementation::prepare;
 use self::{benchmark_options::BenchmarkOptions, implementation::prepare_with_id};
-use crate::jsonpath_rust::{JsonpathRust, JsonpathRustError};
 use crate::{
+    jsonpath_rust::{JsonpathRust, JsonpathRustError},
     rsonpath::{Rsonpath, RsonpathError, RsonpathRecursive},
     rust_jsonski::{JsonSki, JsonSkiError},
     rust_jsurfer::{JSurfer, JSurferError},
+    serde_json_path::{SerdeJsonPath, SerdeJsonPathError},
 };
 use criterion::{Criterion, Throughput};
 use implementation::{Implementation, PreparedQuery};
@@ -22,6 +23,7 @@ pub enum BenchTarget<'q> {
     JsonSki(&'q str),
     JSurfer(&'q str),
     JsonpathRust(&'q str),
+    SerdeJsonPath(&'q str),
 }
 
 pub struct Benchset {
@@ -111,20 +113,32 @@ impl Benchset {
     pub fn add_all_targets_except_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::Rsonpath(query))?
             .add_target(BenchTarget::RsonpathRecursive(query))?
-            .add_target(BenchTarget::JSurfer(query))
+            .add_target(BenchTarget::JSurfer(query))?
+            .add_target(BenchTarget::JsonpathRust(query))?
+            .add_target(BenchTarget::SerdeJsonPath(query))
     }
 
     pub fn add_all_targets_except_jsurfer(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::Rsonpath(query))?
             .add_target(BenchTarget::RsonpathRecursive(query))?
-            .add_target(BenchTarget::JsonSki(query))
+            .add_target(BenchTarget::JsonSki(query))?
+            .add_target(BenchTarget::JsonpathRust(query))?
+            .add_target(BenchTarget::SerdeJsonPath(query))
     }
 
     pub fn add_all_targets(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::Rsonpath(query))?
             .add_target(BenchTarget::RsonpathRecursive(query))?
             .add_target(BenchTarget::JsonSki(query))?
-            .add_target(BenchTarget::JSurfer(query))
+            .add_target(BenchTarget::JSurfer(query))?
+            .add_target(BenchTarget::JsonpathRust(query))?
+            .add_target(BenchTarget::SerdeJsonPath(query))
+    }
+
+    pub fn add_rust_native_targets(self, query: &str) -> Result<Self, BenchmarkError> {
+        self.add_target(BenchTarget::Rsonpath(query))?
+            .add_target(BenchTarget::JsonpathRust(query))?
+            .add_target(BenchTarget::SerdeJsonPath(query))
     }
 
     pub fn finish(self) -> ConfiguredBenchset {
@@ -170,6 +184,11 @@ impl<'a> Target for BenchTarget<'a> {
                 let prepared = prepare(jsonpath_rust, file_path, q)?;
                 Ok(Box::new(prepared))
             }
+            BenchTarget::SerdeJsonPath(q) => {
+                let serde_json_path = SerdeJsonPath::new()?;
+                let prepared = prepare(serde_json_path, file_path, q)?;
+                Ok(Box::new(prepared))
+            }
         }
     }
 
@@ -202,6 +221,11 @@ impl<'a> Target for BenchTarget<'a> {
             BenchTarget::JsonpathRust(q) => {
                 let jsonpath_rust = JsonpathRust::new()?;
                 let prepared = prepare_with_id(jsonpath_rust, id, file_path, q)?;
+                Ok(Box::new(prepared))
+            }
+            BenchTarget::SerdeJsonPath(q) => {
+                let serde_json_path = SerdeJsonPath::new()?;
+                let prepared = prepare_with_id(serde_json_path, id, file_path, q)?;
                 Ok(Box::new(prepared))
             }
         }
@@ -257,5 +281,11 @@ pub enum BenchmarkError {
         #[source]
         #[from]
         JsonpathRustError,
+    ),
+    #[error("error preparing SerdeJsonPath bench: {0}")]
+    SerdeJsonPath(
+        #[source]
+        #[from]
+        SerdeJsonPathError,
     ),
 }
