@@ -3,6 +3,7 @@ use color_eyre::eyre::Result;
 use rsonpath_benchmarks::framework::implementation::Implementation;
 use rsonpath_benchmarks::{
     jsonpath_rust::JsonpathRust, rsonpath::Rsonpath, rust_jsonski::JsonSki, rust_jsurfer::JSurfer,
+    serde_json_path::SerdeJsonPath,
 };
 
 fn main() -> Result<()> {
@@ -14,6 +15,7 @@ fn main() -> Result<()> {
         ImplArg::JsonSki => run(JsonSki::new()?, &args.query, &args.file_path),
         ImplArg::JSurfer => run(JSurfer::new()?, &args.query, &args.file_path),
         ImplArg::JsonpathRust => run(JsonpathRust::new()?, &args.query, &args.file_path),
+        ImplArg::SerdeJsonPath => run(SerdeJsonPath::new()?, &args.query, &args.file_path),
     }
 }
 
@@ -50,4 +52,6 @@ enum ImplArg {
     JSurfer,
     /// Use the jsonpath-rust crate.
     JsonpathRust,
+    /// Use the serde_json_path crate.
+    SerdeJsonPath,
 }
