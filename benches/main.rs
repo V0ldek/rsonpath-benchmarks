@@ -10,6 +10,18 @@ pub fn ast_nested_inner(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
+pub fn ast_deepest(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("ast::deepest", dataset::ast())?
+        .add_target_with_id(
+            BenchTarget::Rsonpath("$..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*..*"),
+            "101_dalmatians")?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
 pub fn bestbuy_products_category(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("bestbuy::products_category", dataset::pison_bestbuy_large())?
         .add_target(BenchTarget::Rsonpath("$.products[*].categoryPath[*].id"))?
@@ -25,9 +37,25 @@ pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkErr
         "bestbuy::products_video_only",
         dataset::pison_bestbuy_large(),
     )?
-    .add_target_with_id(BenchTarget::Rsonpath("$.products[*].videoChapters"), "rsonpath_direct")?
-    .add_target_with_id(BenchTarget::Rsonpath("$..videoChapters"), "rsonpath_descendant")?
+    .add_target_with_id(
+        BenchTarget::Rsonpath("$.products[*].videoChapters"),
+        "rsonpath_direct",
+    )?
+    .add_target_with_id(
+        BenchTarget::Rsonpath("$..videoChapters"),
+        "rsonpath_descendant",
+    )?
     .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+pub fn bestbuy_all_nodes(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("bestbuy::all_nodes", dataset::pison_bestbuy_large())?
+        .add_target(BenchTarget::Rsonpath("$..*"))?
+        .finish();
 
     benchset.run(c);
 
@@ -48,8 +76,14 @@ pub fn google_map_routes(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("google_map::travel_modes", dataset::pison_google_map())?
-        .add_target_with_id(BenchTarget::Rsonpath("$[*].available_travel_modes"), "rsonpath_direct")?
-        .add_target_with_id(BenchTarget::Rsonpath("$..available_travel_modes"), "rsonpath_descendant")?
+        .add_target_with_id(
+            BenchTarget::Rsonpath("$[*].available_travel_modes"),
+            "rsonpath_direct",
+        )?
+        .add_target_with_id(
+            BenchTarget::Rsonpath("$..available_travel_modes"),
+            "rsonpath_descendant",
+        )?
         .finish();
 
     benchset.run(c);
@@ -60,7 +94,10 @@ pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> 
 pub fn walmart_items_name(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("walmart::items_name", dataset::pison_walmart())?
         .add_target_with_id(BenchTarget::Rsonpath("$.items[*].name"), "rsonpath_direct")?
-        .add_target_with_id(BenchTarget::Rsonpath("$..items_name"), "rsonpath_descendant")?
+        .add_target_with_id(
+            BenchTarget::Rsonpath("$..items_name"),
+            "rsonpath_descendant",
+        )?
         .finish();
 
     benchset.run(c);
@@ -70,7 +107,10 @@ pub fn walmart_items_name(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 pub fn twitter_metadata(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("twitter::metadata", dataset::twitter())?
-        .add_target_with_id(BenchTarget::Rsonpath("$.search_metadata.count"), "rsonpath_direct")?
+        .add_target_with_id(
+            BenchTarget::Rsonpath("$.search_metadata.count"),
+            "rsonpath_direct",
+        )?
         .add_target_with_id(BenchTarget::Rsonpath("$..count"), "rsonpath_descendant")?
         .finish();
 
@@ -82,8 +122,10 @@ pub fn twitter_metadata(c: &mut Criterion) -> Result<(), BenchmarkError> {
 benchsets!(
     main_benches,
     ast_nested_inner,
+    ast_deepest,
     bestbuy_products_category,
     bestbuy_products_video_only,
+    bestbuy_all_nodes,
     google_map_routes,
     google_map_travel_modes,
     walmart_items_name,
