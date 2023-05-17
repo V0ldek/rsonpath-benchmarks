@@ -104,7 +104,7 @@ impl Implementation for RsonpathRecursive {
 
 fn rsonpath_load_file(file_path: &str) -> Result<OwnedBytes, RsonpathError> {
     let contents = fs::read_to_string(file_path)?;
-    let input = OwnedBytes::from(contents);
+    let input = OwnedBytes::try_from(contents)?;
 
     Ok(input)
 }
@@ -115,6 +115,8 @@ pub enum RsonpathError {
     CompilerError(#[from] rsonpath_lib::query::error::CompilerError),
     #[error(transparent)]
     EngineError(#[from] rsonpath_lib::engine::error::EngineError),
+    #[error(transparent)]
+    InputError(#[from] rsonpath_lib::input::error::InputError),
     #[error(transparent)]
     IoError(#[from] io::Error),
     #[error("something happened")]
