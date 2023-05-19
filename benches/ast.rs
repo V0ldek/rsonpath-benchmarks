@@ -30,4 +30,15 @@ pub fn nested_inner(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
+pub fn inner_array(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("inner_array", dataset::ast())?
+        .add_all_targets_except_jsonski("$..inner[0]")?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+
 benchsets!(ast_benches, decl_name, included_from, nested_inner);

@@ -55,6 +55,16 @@ pub fn hashtags_of_retweets(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
+pub fn second_user_mention_index(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("user_mentions_indicies", dataset::twitter())?
+        .add_all_targets_except_jsonski("$..entities.user_mentions[1]")?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
 benchsets!(
     twitter_benches,
     metadata_1,
