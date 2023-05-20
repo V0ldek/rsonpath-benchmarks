@@ -121,7 +121,7 @@ pub fn twitter_metadata(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 pub fn inner_array(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("inner_array", dataset::ast())?
-        .add_target(BenchTarget::Rsonpath("$..inner[0]")?
+        .add_target(BenchTarget::Rsonpath("$..inner[0]"))?
         .finish();
 
     benchset.run(c);
@@ -140,7 +140,7 @@ pub fn user_second_mention_index(c: &mut Criterion) -> Result<(), BenchmarkError
 }
 
 pub fn all_first_index(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("user_mentions_indicies", dataset::twitter())?
+    let benchset = Benchset::new("all_first_index", dataset::twitter())?
         .add_target(BenchTarget::Rsonpath("$..[0]"))?
         .finish();
 
@@ -159,9 +159,8 @@ benchsets!(
     google_map_routes,
     google_map_travel_modes,
     inner_array,
-    user_second_mention_index
+    user_second_mention_index,
     walmart_items_name,
     twitter_metadata,
-    inner_array,
     all_first_index
 );
