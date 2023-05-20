@@ -121,7 +121,7 @@ pub fn twitter_metadata(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 pub fn inner_array(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("inner_array", dataset::ast())?
-        .add_all_targets_except_jsonski("$..inner[0]")?
+        .add_target(BenchTarget::Rsonpath("$..inner[0]")?
         .finish();
 
     benchset.run(c);
@@ -131,7 +131,7 @@ pub fn inner_array(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 pub fn user_second_mention_index(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("user_mentions_indicies", dataset::twitter())?
-        .add_all_targets_except_jsonski("$..entities.user_mentions[1]")?
+        .add_target(BenchTarget::Rsonpath("$..entities.user_mentions[1]"))?
         .finish();
 
     benchset.run(c);
@@ -141,7 +141,7 @@ pub fn user_second_mention_index(c: &mut Criterion) -> Result<(), BenchmarkError
 
 pub fn all_first_index(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("user_mentions_indicies", dataset::twitter())?
-        .add_all_targets_except_jsonski("$..[0]")?
+        .add_target(BenchTarget::Rsonpath("$..[0]"))?
         .finish();
 
     benchset.run(c);
