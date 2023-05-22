@@ -2,9 +2,10 @@ use crate::framework::implementation::Implementation;
 use ouroboros::self_referencing;
 use rsonpath_lib::engine::{main::MainEngine, recursive::RecursiveEngine};
 use rsonpath_lib::{
-    result::CountResult,
-    engine::{Compiler, Engine, Input},
+    engine::{Compiler, Engine},
+    input::OwnedBytes,
     query::JsonPathQuery,
+    result::CountResult,
 };
 use std::{fs, io};
 use thiserror::Error;
@@ -32,7 +33,7 @@ pub struct RsonpathRecursiveQuery {
 impl Implementation for Rsonpath {
     type Query = RsonpathQuery;
 
-    type File = Input;
+    type File = OwnedBytes;
 
     type Error = RsonpathError;
 
@@ -60,7 +61,7 @@ impl Implementation for Rsonpath {
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<u64, Self::Error> {
         query
-            .with_engine(|engine| engine.run::<CountResult>(file).map(|x| x.get() as u64))
+            .with_engine(|engine| engine.run::<_, CountResult>(file).map(|x| x.get() as u64))
             .map_err(|err| err.into())
     }
 }
@@ -68,7 +69,7 @@ impl Implementation for Rsonpath {
 impl Implementation for RsonpathRecursive {
     type Query = RsonpathRecursiveQuery;
 
-    type File = Input;
+    type File = OwnedBytes;
 
     type Error = RsonpathError;
 
@@ -96,14 +97,14 @@ impl Implementation for RsonpathRecursive {
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<u64, Self::Error> {
         query
-            .with_engine(|engine| engine.run::<CountResult>(file).map(|x| x.get() as u64))
+            .with_engine(|engine| engine.run::<_, CountResult>(file).map(|x| x.get() as u64))
             .map_err(|err| err.into())
     }
 }
 
-fn rsonpath_load_file(file_path: &str) -> Result<Input, RsonpathError> {
-    let mut contents = fs::read_to_string(file_path)?;
-    let input = Input::new(&mut contents);
+fn rsonpath_load_file(file_path: &str) -> Result<OwnedBytes, RsonpathError> {
+    let contents = fs::read_to_string(file_path)?;
+    let input = OwnedBytes::try_from(contents)?;
 
     Ok(input)
 }
@@ -114,6 +115,8 @@ pub enum RsonpathError {
     CompilerError(#[from] rsonpath_lib::query::error::CompilerError),
     #[error(transparent)]
     EngineError(#[from] rsonpath_lib::engine::error::EngineError),
+    #[error(transparent)]
+    InputError(#[from] rsonpath_lib::input::error::InputError),
     #[error(transparent)]
     IoError(#[from] io::Error),
     #[error("something happened")]

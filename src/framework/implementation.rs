@@ -18,7 +18,7 @@ pub struct PreparedQuery<I: Implementation> {
     pub(crate) implementation: I,
     pub(crate) id: &'static str,
     pub(crate) query: I::Query,
-    pub(crate) file: I::File,
+    pub(crate) file_path: String,
 }
 
 pub(crate) fn prepare<I: Implementation>(
@@ -36,12 +36,11 @@ pub(crate) fn prepare_with_id<I: Implementation>(
     query: &str,
 ) -> Result<PreparedQuery<I>, I::Error> {
     let query = implementation.compile_query(query)?;
-    let file = implementation.load_file(file_path)?;
 
     Ok(PreparedQuery {
         implementation,
         id,
         query,
-        file,
+        file_path: file_path.to_owned(),
     })
 }

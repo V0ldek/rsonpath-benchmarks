@@ -244,7 +244,8 @@ impl<I: Implementation> BenchFn for PreparedQuery<I> {
     }
 
     fn run(&self) -> u64 {
-        self.implementation.run(&self.query, &self.file).unwrap()
+        let file = self.implementation.load_file(&self.file_path).unwrap();
+        self.implementation.run(&self.query, &file).unwrap()
     }
 }
 
