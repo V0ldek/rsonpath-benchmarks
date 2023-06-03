@@ -119,6 +119,36 @@ pub fn twitter_metadata(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
+pub fn inner_array(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("inner_array", dataset::ast())?
+        .add_target(BenchTarget::Rsonpath("$..inner[0]"))?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+pub fn user_second_mention_index(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("user_mentions_indicies", dataset::twitter())?
+        .add_target(BenchTarget::Rsonpath("$..entities.user_mentions[1]"))?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+pub fn all_first_index(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("all_first_index", dataset::twitter())?
+        .add_target(BenchTarget::Rsonpath("$..[0]"))?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
 benchsets!(
     main_benches,
     ast_nested_inner,
@@ -128,6 +158,9 @@ benchsets!(
     bestbuy_all_nodes,
     google_map_routes,
     google_map_travel_modes,
+    inner_array,
+    user_second_mention_index,
     walmart_items_name,
     twitter_metadata,
+    all_first_index
 );
