@@ -1,7 +1,7 @@
 use crate::framework::implementation::Implementation;
 use ouroboros::self_referencing;
-use rsonpath_lib::engine::{main::MainEngine, recursive::RecursiveEngine};
-use rsonpath_lib::{
+use rsonpath::engine::{main::MainEngine, recursive::RecursiveEngine};
+use rsonpath::{
     engine::{Compiler, Engine},
     input::MmapInput,
     query::JsonPathQuery,
@@ -112,11 +112,11 @@ fn rsonpath_load_file(file_path: &str) -> Result<MmapInput, RsonpathError> {
 #[derive(Error, Debug)]
 pub enum RsonpathError {
     #[error(transparent)]
-    CompilerError(#[from] rsonpath_lib::query::error::CompilerError),
+    CompilerError(#[from] rsonpath::query::error::CompilerError),
     #[error(transparent)]
-    EngineError(#[from] rsonpath_lib::engine::error::EngineError),
+    EngineError(#[from] rsonpath::engine::error::EngineError),
     #[error(transparent)]
-    InputError(#[from] rsonpath_lib::input::error::InputError),
+    InputError(#[from] rsonpath::input::error::InputError),
     #[error(transparent)]
     IoError(#[from] io::Error),
     #[error("something happened")]
