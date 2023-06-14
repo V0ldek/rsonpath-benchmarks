@@ -1,9 +1,9 @@
 use crate::framework::implementation::Implementation;
 use ouroboros::self_referencing;
-use rsonpath_lib::engine::{main::MainEngine, recursive::RecursiveEngine};
-use rsonpath_lib::{
+use rsonpath::engine::{main::MainEngine, recursive::RecursiveEngine};
+use rsonpath::{
     engine::{Compiler, Engine},
-    input::OwnedBytes,
+    input::MmapInput,
     query::JsonPathQuery,
     result::CountResult,
 };
@@ -33,7 +33,7 @@ pub struct RsonpathRecursiveQuery {
 impl Implementation for Rsonpath {
     type Query = RsonpathQuery;
 
-    type File = OwnedBytes;
+    type File = MmapInput;
 
     type Error = RsonpathError;
 
@@ -69,7 +69,7 @@ impl Implementation for Rsonpath {
 impl Implementation for RsonpathRecursive {
     type Query = RsonpathRecursiveQuery;
 
-    type File = OwnedBytes;
+    type File = MmapInput;
 
     type Error = RsonpathError;
 
@@ -102,9 +102,9 @@ impl Implementation for RsonpathRecursive {
     }
 }
 
-fn rsonpath_load_file(file_path: &str) -> Result<OwnedBytes, RsonpathError> {
-    let contents = fs::read_to_string(file_path)?;
-    let input = OwnedBytes::try_from(contents)?;
+fn rsonpath_load_file(file_path: &str) -> Result<MmapInput, RsonpathError> {
+    let file = fs::File::open(file_path)?;
+    let input = MmapInput::map_file(&file)?;
 
     Ok(input)
 }
@@ -112,11 +112,11 @@ fn rsonpath_load_file(file_path: &str) -> Result<OwnedBytes, RsonpathError> {
 #[derive(Error, Debug)]
 pub enum RsonpathError {
     #[error(transparent)]
-    CompilerError(#[from] rsonpath_lib::query::error::CompilerError),
+    CompilerError(#[from] rsonpath::query::error::CompilerError),
     #[error(transparent)]
-    EngineError(#[from] rsonpath_lib::engine::error::EngineError),
+    EngineError(#[from] rsonpath::engine::error::EngineError),
     #[error(transparent)]
-    InputError(#[from] rsonpath_lib::input::error::InputError),
+    InputError(#[from] rsonpath::input::error::InputError),
     #[error(transparent)]
     IoError(#[from] io::Error),
     #[error("something happened")]

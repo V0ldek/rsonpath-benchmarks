@@ -24,13 +24,13 @@ name = "pathimpl"
 cfg-if = "1.0.0"
 clap = { version = "4.1.11", features = ["derive", "wrap_help"] }
 color-eyre = { version = "0.6.2", default-features = false }
-criterion = "0.4.0"
+criterion = "0.5.1"
 eyre = "0.6.8"
 flate2 = "1.0.25"
 hex-literal = "0.4.0"
 indicatif = "0.17.3"
 jni = { version = "0.21.1", features = ["invocation", "default"] }
-jsonpath-rust = "0.2.6"
+jsonpath-rust = "0.3.0"
 libc = "0.2.126"
 lazy_static = "1.4.0"
 serde_json = "1.0.95"
