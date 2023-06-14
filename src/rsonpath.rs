@@ -104,7 +104,7 @@ impl Implementation for RsonpathRecursive {
 
 fn rsonpath_load_file(file_path: &str) -> Result<MmapInput, RsonpathError> {
     let file = fs::File::open(file_path)?;
-    let input = MmapInput::map_file(&file)?;
+    let input = unsafe { MmapInput::map_file(&file)? };
 
     Ok(input)
 }
