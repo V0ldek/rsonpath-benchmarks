@@ -7,6 +7,7 @@
 	],
 	"settings": {
 		"cSpell.words": [
+			"Benchset",
 			"bitmasks",
 			"clippy",
 			"clmulepi",
@@ -23,6 +24,8 @@
 			"Goessner",
 			"Hasher",
 			"jsonpath",
+			"jsonski",
+			"jsurfer",
 			"loadu",
 			"mainsnak",
 			"Mateusz",
@@ -37,6 +40,7 @@
 			"regs",
 			"repr",
 			"rsonpath",
+			"Rsonpath",
 			"rustdoc",
 			"RUSTFLAGS",
 			"rustfmt",
@@ -45,6 +49,7 @@
 			"srli",
 			"stackless",
 			"Structurals",
+			"thiserror",
 			"Uninit",
 			"vectorially",
 			"WHITESPACES"

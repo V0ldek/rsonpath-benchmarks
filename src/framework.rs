@@ -2,7 +2,7 @@ use self::implementation::prepare;
 use self::{benchmark_options::BenchmarkOptions, implementation::prepare_with_id};
 use crate::{
     jsonpath_rust::{JsonpathRust, JsonpathRustError},
-    rsonpath::{Rsonpath, RsonpathError, RsonpathRecursive},
+    rsonpath::{Rsonpath, RsonpathError},
     rust_jsonski::{JsonSki, JsonSkiError},
     rust_jsurfer::{JSurfer, JSurferError},
     serde_json_path::{SerdeJsonPath, SerdeJsonPathError},
@@ -19,7 +19,6 @@ pub mod implementation;
 #[derive(Clone, Copy, Debug)]
 pub enum BenchTarget<'q> {
     Rsonpath(&'q str),
-    RsonpathRecursive(&'q str),
     JsonSki(&'q str),
     JSurfer(&'q str),
     JsonpathRust(&'q str),
@@ -100,11 +99,7 @@ impl Benchset {
         Ok(self)
     }
 
-    pub fn add_target_with_id(
-        mut self,
-        target: BenchTarget<'_>,
-        id: &'static str,
-    ) -> Result<Self, BenchmarkError> {
+    pub fn add_target_with_id(mut self, target: BenchTarget<'_>, id: &'static str) -> Result<Self, BenchmarkError> {
         let bench_fn = target.to_bench_fn_with_id(&self.json_document.file_path, id)?;
         self.implementations.push(bench_fn);
         Ok(self)
@@ -112,7 +107,6 @@ impl Benchset {
 
     pub fn add_all_targets_except_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::Rsonpath(query))?
-            .add_target(BenchTarget::RsonpathRecursive(query))?
             .add_target(BenchTarget::JSurfer(query))?
             .add_target(BenchTarget::JsonpathRust(query))?
             .add_target(BenchTarget::SerdeJsonPath(query))
@@ -120,7 +114,6 @@ impl Benchset {
 
     pub fn add_all_targets_except_jsurfer(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::Rsonpath(query))?
-            .add_target(BenchTarget::RsonpathRecursive(query))?
             .add_target(BenchTarget::JsonSki(query))?
             .add_target(BenchTarget::JsonpathRust(query))?
             .add_target(BenchTarget::SerdeJsonPath(query))
@@ -128,7 +121,6 @@ impl Benchset {
 
     pub fn add_all_targets(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::Rsonpath(query))?
-            .add_target(BenchTarget::RsonpathRecursive(query))?
             .add_target(BenchTarget::JsonSki(query))?
             .add_target(BenchTarget::JSurfer(query))?
             .add_target(BenchTarget::JsonpathRust(query))?
@@ -149,11 +141,7 @@ impl Benchset {
 trait Target {
     fn to_bench_fn(self, file_path: &str) -> Result<Box<dyn BenchFn>, BenchmarkError>;
 
-    fn to_bench_fn_with_id(
-        self,
-        file_path: &str,
-        id: &'static str,
-    ) -> Result<Box<dyn BenchFn>, BenchmarkError>;
+    fn to_bench_fn_with_id(self, file_path: &str, id: &'static str) -> Result<Box<dyn BenchFn>, BenchmarkError>;
 }
 
 impl<'a> Target for BenchTarget<'a> {
@@ -161,11 +149,6 @@ impl<'a> Target for BenchTarget<'a> {
         match self {
             BenchTarget::Rsonpath(q) => {
                 let rsonpath = Rsonpath::new()?;
-                let prepared = prepare(rsonpath, file_path, q)?;
-                Ok(Box::new(prepared))
-            }
-            BenchTarget::RsonpathRecursive(q) => {
-                let rsonpath = RsonpathRecursive::new()?;
                 let prepared = prepare(rsonpath, file_path, q)?;
                 Ok(Box::new(prepared))
             }
@@ -192,19 +175,10 @@ impl<'a> Target for BenchTarget<'a> {
         }
     }
 
-    fn to_bench_fn_with_id(
-        self,
-        file_path: &str,
-        id: &'static str,
-    ) -> Result<Box<dyn BenchFn>, BenchmarkError> {
+    fn to_bench_fn_with_id(self, file_path: &str, id: &'static str) -> Result<Box<dyn BenchFn>, BenchmarkError> {
         match self {
             BenchTarget::Rsonpath(q) => {
                 let rsonpath = Rsonpath::new()?;
-                let prepared = prepare_with_id(rsonpath, id, file_path, q)?;
-                Ok(Box::new(prepared))
-            }
-            BenchTarget::RsonpathRecursive(q) => {
-                let rsonpath = RsonpathRecursive::new()?;
                 let prepared = prepare_with_id(rsonpath, id, file_path, q)?;
                 Ok(Box::new(prepared))
             }
