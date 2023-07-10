@@ -1,4 +1,7 @@
 #include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+
 #include "RecordLoader.h"
 using namespace std;
 
@@ -6,6 +9,7 @@ using namespace std;
 
 Record* RecordLoader::loadSingleRecord(char* file_path) {
     unsigned long size;
+    
     FILE* fp = fopen (file_path,"rb");
     if (fp == NULL) {
         return NULL;
@@ -37,6 +41,27 @@ Record* RecordLoader::loadSingleRecord(char* file_path) {
     record->text = record_text;
     record->rec_start_pos = 0;
     record->rec_length = strlen(record_text);
+    return record;
+}
+
+Record* RecordLoader::loadSingleRecordMmap(char* file_path) {
+    unsigned long size;
+    struct stat sb;
+    int fd = open(file_path, O_RDONLY);
+    if (fd == -1){
+        cout << "Fail to open file" << endl;
+    }
+    if (fstat(fd, &sb) == -1){
+        cout << "Error when stating file" << endl;
+    }
+    char * buffer = (char *) mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+    // only one single record
+    Record* record = new Record();
+    record->text = buffer;
+    record->rec_start_pos = 0;
+    record->rec_length = sb.st_size;
+    close(fd);
     return record;
 }
 

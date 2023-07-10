@@ -16,6 +16,21 @@ Record *loadFile(char *file_path)
     return rec;
 }
 
+Record *loadFileMmap(char *file_path)
+{
+    Record *rec = RecordLoader::loadSingleRecordMmap(file_path);
+
+    if (rec == NULL)
+    {
+        std::cerr << "panic: failed to load record\n";
+        exit(1);
+    }
+
+    return rec;
+}
+
+
+
 long runJsonSki(char *query, Record *record)
 {
     QueryProcessor processor(query);
