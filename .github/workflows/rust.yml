@@ -8,7 +8,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  CARGO_PATCH_CRATES_IO_RSONPATH_LIB_PATH: ''
   CARGO_PATCH_CRATES_IO_RSONPATH_LIB_GIT: https://github.com/V0ldek/rsonpath.git
 
 jobs:
@@ -16,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Force remove rsonpath-lib patch from Cargo.toml
+      run: sed -i '/^\[patch.crates-io\]/d' ./Cargo.toml && sed -i '/^rsonpath-lib = { path = .*$/d' ./Cargo.toml
     - uses: actions/setup-java@v3.6.0
       name: Setup Java JDK
       with:
