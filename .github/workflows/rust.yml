@@ -8,7 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: --config 'patch.crates-io.rsonpath-lib.git="https://github.com/V0ldek/rsonpath.git"'
+  CARGO_PATCH_CRATES_IO_RSONPATH_LIB_GIT: https://github.com/V0ldek/rsonpath.git
 
 jobs:
   build:
