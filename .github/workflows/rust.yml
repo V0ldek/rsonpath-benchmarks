@@ -8,6 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  CARGO_PATCH_CRATES_IO_RSONPATH_LIB_PATH: ''
   CARGO_PATCH_CRATES_IO_RSONPATH_LIB_GIT: https://github.com/V0ldek/rsonpath.git
 
 jobs:
