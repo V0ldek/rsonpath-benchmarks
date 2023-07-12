@@ -51,5 +51,5 @@ pub enum JsonpathRustError {
     #[error("error parsing JSON with serde: '{0}'")]
     SerdeError(#[from] serde_json::Error),
     #[error("error parsing JSONPath query: '{0}'")]
-    JsonPathInstError(<JsonPath as TryFrom<&'static str>>::Error)
+    JsonPathInstError(<JsonPath as TryFrom<&'static str>>::Error),
 }

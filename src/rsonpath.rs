@@ -1,6 +1,6 @@
 use crate::framework::implementation::Implementation;
 use ouroboros::self_referencing;
-use rsonpath::engine::{main::MainEngine};
+use rsonpath::engine::main::MainEngine;
 use rsonpath::{
     engine::{Compiler, Engine},
     input::MmapInput,

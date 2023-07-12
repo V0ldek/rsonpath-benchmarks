@@ -99,7 +99,11 @@ impl Benchset {
         Ok(self)
     }
 
-    pub fn add_target_with_id(mut self, target: BenchTarget<'_>, id: &'static str) -> Result<Self, BenchmarkError> {
+    pub fn add_target_with_id(
+        mut self,
+        target: BenchTarget<'_>,
+        id: &'static str,
+    ) -> Result<Self, BenchmarkError> {
         let bench_fn = target.to_bench_fn_with_id(&self.json_document.file_path, id)?;
         self.implementations.push(bench_fn);
         Ok(self)
@@ -141,7 +145,11 @@ impl Benchset {
 trait Target {
     fn to_bench_fn(self, file_path: &str) -> Result<Box<dyn BenchFn>, BenchmarkError>;
 
-    fn to_bench_fn_with_id(self, file_path: &str, id: &'static str) -> Result<Box<dyn BenchFn>, BenchmarkError>;
+    fn to_bench_fn_with_id(
+        self,
+        file_path: &str,
+        id: &'static str,
+    ) -> Result<Box<dyn BenchFn>, BenchmarkError>;
 }
 
 impl<'a> Target for BenchTarget<'a> {
@@ -175,7 +183,11 @@ impl<'a> Target for BenchTarget<'a> {
         }
     }
 
-    fn to_bench_fn_with_id(self, file_path: &str, id: &'static str) -> Result<Box<dyn BenchFn>, BenchmarkError> {
+    fn to_bench_fn_with_id(
+        self,
+        file_path: &str,
+        id: &'static str,
+    ) -> Result<Box<dyn BenchFn>, BenchmarkError> {
         match self {
             BenchTarget::Rsonpath(q) => {
                 let rsonpath = Rsonpath::new()?;
