@@ -47,11 +47,7 @@ impl DatasetSource {
 impl DatasetArchive {
     fn validate_archive_checksum(&self, actual: Sha256Digest) -> Result<(), DatasetError> {
         if self.checksum != actual {
-            Err(DatasetError::InvalidArchiveChecksum(
-                self.url,
-                self.checksum,
-                actual,
-            ))
+            Err(DatasetError::InvalidArchiveChecksum(self.url, self.checksum, actual))
         } else {
             Ok(())
         }
@@ -65,7 +61,10 @@ impl Dataset {
             Some(json_file) => {
                 eprintln!(
                     "File for dataset {} does not match expected checksum ({} expected, {} actual). Redownloading.",
-                    self.name, format_hex_string(&self.checksum), format_hex_string(&json_file.checksum));
+                    self.name,
+                    format_hex_string(&self.checksum),
+                    format_hex_string(&json_file.checksum)
+                );
             }
             None => {
                 eprintln!("File for dataset {} does not exist.", self.name);
@@ -89,9 +88,7 @@ impl Dataset {
     }
 
     fn directory_path(&self) -> Result<&Path, DatasetError> {
-        self.json_path()
-            .parent()
-            .ok_or(DatasetError::InvalidPath(self.path))
+        self.json_path().parent().ok_or(DatasetError::InvalidPath(self.path))
     }
 
     fn create_directories(&self) -> Result<(), DatasetError> {
@@ -107,8 +104,7 @@ impl Dataset {
             Ok(f) => {
                 let reader = io::BufReader::new(f);
                 let progress = get_progress_bar("Checking dataset integrity...", None);
-                let (md5, size_in_bytes) =
-                    read_digest_and_write::<_, fs::File>(progress.wrap_read(reader), None)?;
+                let (md5, size_in_bytes) = read_digest_and_write::<_, fs::File>(progress.wrap_read(reader), None)?;
 
                 Ok(Some(JsonFile {
                     file_path: self.path.to_string(),
@@ -137,8 +133,7 @@ impl Dataset {
 
         let response = make_download_request(url)?;
         let progress = get_progress_bar("Downloading", response.content_length());
-        let (md5, size_in_bytes) =
-            read_digest_and_write(progress.wrap_read(response), Some(&mut file))?;
+        let (md5, size_in_bytes) = read_digest_and_write(progress.wrap_read(response), Some(&mut file))?;
         progress.finish_and_clear();
 
         Ok(JsonFile {
@@ -153,22 +148,17 @@ impl Dataset {
 
         self.create_directories()?;
         let archive_path = self.archive_path();
-        let mut archive_file =
-            fs::File::create(&archive_path).map_err(DatasetError::FileSystemError)?;
+        let mut archive_file = fs::File::create(&archive_path).map_err(DatasetError::FileSystemError)?;
 
         let response = make_download_request(archive.url)?;
         let progress = get_progress_bar("Downloading", response.content_length());
-        let (checksum, archive_size) =
-            read_digest_and_write(progress.wrap_read(response), Some(&mut archive_file))?;
+        let (checksum, archive_size) = read_digest_and_write(progress.wrap_read(response), Some(&mut archive_file))?;
         progress.finish_and_clear();
-        archive_file
-            .flush()
-            .map_err(DatasetError::InputOutputError)?;
+        archive_file.flush().map_err(DatasetError::InputOutputError)?;
 
         archive.validate_archive_checksum(checksum)?;
 
-        let mut json_file =
-            fs::File::create(self.json_path()).map_err(DatasetError::FileSystemError)?;
+        let mut json_file = fs::File::create(self.json_path()).map_err(DatasetError::FileSystemError)?;
         let archive_file = fs::File::open(&archive_path).map_err(DatasetError::FileSystemError)?;
         let progress = get_progress_bar("Extracting", Some(archive_size as u64));
         let gz = GzDecoder::new(progress.wrap_read(archive_file));
@@ -185,24 +175,16 @@ impl Dataset {
         })
     }
 
-    fn download_tar_archive(
-        &self,
-        archive: &DatasetArchive,
-        initial_path: &Path,
-    ) -> Result<JsonFile, DatasetError> {
+    fn download_tar_archive(&self, archive: &DatasetArchive, initial_path: &Path) -> Result<JsonFile, DatasetError> {
         self.create_directories()?;
         let archive_path = self.archive_path();
-        let mut archive_file =
-            fs::File::create(&archive_path).map_err(DatasetError::FileSystemError)?;
+        let mut archive_file = fs::File::create(&archive_path).map_err(DatasetError::FileSystemError)?;
 
         let response = make_download_request(archive.url)?;
         let progress = get_progress_bar("Downloading", response.content_length());
-        let (checksum, archive_size) =
-            read_digest_and_write(progress.wrap_read(response), Some(&mut archive_file))?;
+        let (checksum, archive_size) = read_digest_and_write(progress.wrap_read(response), Some(&mut archive_file))?;
         progress.finish_and_clear();
-        archive_file
-            .flush()
-            .map_err(DatasetError::InputOutputError)?;
+        archive_file.flush().map_err(DatasetError::InputOutputError)?;
 
         archive.validate_archive_checksum(checksum)?;
 
@@ -222,21 +204,15 @@ impl Dataset {
     }
 }
 
-fn unpack_tar_gz(
-    archive_path: &Path,
-    archive_size: usize,
-    target_path: &Path,
-) -> Result<(), DatasetError> {
+fn unpack_tar_gz(archive_path: &Path, archive_size: usize, target_path: &Path) -> Result<(), DatasetError> {
     use flate2::read::GzDecoder;
     use tar::Archive;
 
     let archive_file = fs::File::open(archive_path).map_err(DatasetError::FileSystemError)?;
-    let progress =
-        get_progress_bar("Extracting", Some(archive_size as u64)).wrap_read(archive_file);
+    let progress = get_progress_bar("Extracting", Some(archive_size as u64)).wrap_read(archive_file);
     let gz = GzDecoder::new(progress);
     let mut tar = Archive::new(gz);
-    tar.unpack(target_path)
-        .map_err(DatasetError::InputOutputError)
+    tar.unpack(target_path).map_err(DatasetError::InputOutputError)
 }
 
 fn make_download_request(url: &'static str) -> Result<reqwest::Response, DatasetError> {
@@ -255,20 +231,17 @@ where
 {
     use indicatif::{ProgressBar, ProgressStyle};
     let style = ProgressStyle::with_template(
-        "{msg} {spinner} {wide_bar:.green/white} {bytes:>12}/{total_bytes:>12} ({bytes_per_sec:>12}) {eta:>10}"
-    ).unwrap().progress_chars("=>-");
-    let progress = content.map_or_else(ProgressBar::new_spinner, |x| {
-        ProgressBar::new(x).with_style(style)
-    });
+        "{msg} {spinner} {wide_bar:.green/white} {bytes:>12}/{total_bytes:>12} ({bytes_per_sec:>12}) {eta:>10}",
+    )
+    .unwrap()
+    .progress_chars("=>-");
+    let progress = content.map_or_else(ProgressBar::new_spinner, |x| ProgressBar::new(x).with_style(style));
     progress.set_message(msg);
 
     progress
 }
 
-fn read_digest_and_write<R, W>(
-    mut reader: R,
-    mut writer: Option<&mut W>,
-) -> Result<(Sha256Digest, usize), DatasetError>
+fn read_digest_and_write<R, W>(mut reader: R, mut writer: Option<&mut W>) -> Result<(Sha256Digest, usize), DatasetError>
 where
     R: Read,
     W: Write,
@@ -277,9 +250,7 @@ where
     let mut buf = [0; 4096];
     let mut hasher = Sha256::new();
     loop {
-        let size = reader
-            .read(&mut buf)
-            .map_err(DatasetError::InputOutputError)?;
+        let size = reader.read(&mut buf).map_err(DatasetError::InputOutputError)?;
         if size == 0 {
             break;
         }
@@ -287,8 +258,7 @@ where
         hasher.update(&buf[..size]);
 
         if let Some(w) = writer.as_mut() {
-            w.write_all(&buf[..size])
-                .map_err(DatasetError::InputOutputError)?;
+            w.write_all(&buf[..size]).map_err(DatasetError::InputOutputError)?;
         }
     }
 

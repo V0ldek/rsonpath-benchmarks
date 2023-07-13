@@ -47,15 +47,11 @@ fn setup_jsurfer() -> Result<()> {
         .status()?;
 
     if !gradlew_status.success() {
-        return Err(eyre!(
-            "gradlew execution failed with status code: {}",
-            gradlew_status
-        ));
+        return Err(eyre!("gradlew execution failed with status code: {}", gradlew_status));
     }
 
     let java_home = std::env::var("JAVA_HOME").wrap_err("JAVA_HOME env variable not set")?;
-    let jar_absolute_path =
-        std::path::Path::new("./implementations/jsurferShim/lib/jsurferShim.jar").canonicalize()?;
+    let jar_absolute_path = std::path::Path::new("./implementations/jsurferShim/lib/jsurferShim.jar").canonicalize()?;
 
     println!("cargo:rerun-if-changed=implementations/jsurferShim");
     println!("cargo:rustc-env=LD_LIBRARY_PATH={java_home}/lib/server");

@@ -5,16 +5,12 @@ use rsonpath::query::JsonPathQuery;
 fn rsonpath_query_compilation(c: &mut Criterion, query_string: &str) {
     let mut group = c.benchmark_group(format! {"rsonpath_{query_string}"});
 
-    group.bench_with_input(
-        BenchmarkId::new("compile_query", query_string),
-        query_string,
-        |b, q| {
-            b.iter(|| {
-                let query = JsonPathQuery::parse(q).unwrap();
-                black_box(RsonpathEngine::compile_query(&query).unwrap());
-            })
-        },
-    );
+    group.bench_with_input(BenchmarkId::new("compile_query", query_string), query_string, |b, q| {
+        b.iter(|| {
+            let query = JsonPathQuery::parse(q).unwrap();
+            black_box(RsonpathEngine::compile_query(&query).unwrap());
+        })
+    });
 
     group.finish();
 }

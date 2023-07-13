@@ -86,12 +86,9 @@ pub fn editor_affiliation_descendant(c: &mut Criterion) -> Result<(), BenchmarkE
 }
 
 fn scalability(c: &mut Criterion, size: u32) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new(
-        format!("scalability_affiliation{size}"),
-        dataset::crossref(size),
-    )?
-    .add_target(BenchTarget::Rsonpath("$..affiliation..name"))?
-    .finish();
+    let benchset = Benchset::new(format!("scalability_affiliation{size}"), dataset::crossref(size))?
+        .add_target(BenchTarget::Rsonpath("$..affiliation..name"))?
+        .finish();
 
     benchset.run(c);
 

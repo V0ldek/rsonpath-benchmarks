@@ -79,8 +79,7 @@ pub struct Overhead<'a, 'j> {
 
 impl Jvm {
     fn new() -> Result<Self, JSurferError> {
-        let jar_path = std::env::var("RSONPATH_BENCH_JSURFER_SHIM_JAR_PATH")
-            .map_err(JSurferError::NoJarPathEnvVar)?;
+        let jar_path = std::env::var("RSONPATH_BENCH_JSURFER_SHIM_JAR_PATH").map_err(JSurferError::NoJarPathEnvVar)?;
 
         let jvm_args = InitArgsBuilder::new()
             .version(JNIVersion::V8)
@@ -124,9 +123,9 @@ impl<'j> JSurferContext<'j> {
     }
 
     pub fn create_overhead(&'_ self) -> Result<Overhead<'_, 'j>, JSurferError> {
-        let overhead_result =
-            self.env()
-                .call_static_method(&self.shim, OVERHEAD_METHOD, overhead_sig(), &[])?;
+        let overhead_result = self
+            .env()
+            .call_static_method(&self.shim, OVERHEAD_METHOD, overhead_sig(), &[])?;
 
         let actual_type = overhead_result.type_name();
         let overhead_object = overhead_result
@@ -142,17 +141,13 @@ impl<'j> JSurferContext<'j> {
 
 impl<'a, 'j> Overhead<'a, 'j> {
     pub fn run(&self, loaded_file: &LoadedFile) -> Result<i64, JSurferError> {
-        let result = self.ctx.env().call_method(
-            &self.shim,
-            RUN_METHOD,
-            run_sig(),
-            &[(&loaded_file.file_object).into()],
-        )?;
+        let result =
+            self.ctx
+                .env()
+                .call_method(&self.shim, RUN_METHOD, run_sig(), &[(&loaded_file.file_object).into()])?;
 
         let actual_type = result.type_name();
-        result
-            .j()
-            .map_err(|e| type_error(e, RUN_METHOD, "Long", actual_type))
+        result.j().map_err(|e| type_error(e, RUN_METHOD, "Long", actual_type))
     }
 }
 
@@ -190,12 +185,9 @@ impl Implementation for JSurfer {
     fn load_file(&self, path: &str) -> Result<Self::File, Self::Error> {
         let file_string = self.env().new_string(path)?;
 
-        let loaded_file = self.env().call_static_method(
-            self.shim(),
-            LOAD_METHOD,
-            load_file_sig(),
-            &[(&file_string).into()],
-        )?;
+        let loaded_file =
+            self.env()
+                .call_static_method(self.shim(), LOAD_METHOD, load_file_sig(), &[(&file_string).into()])?;
 
         let actual_type = loaded_file.type_name();
         loaded_file
@@ -236,10 +228,8 @@ impl Implementation for JSurfer {
             .j()
             .map_err(|e| type_error(e, RUN_METHOD, "Long (non-negative)", actual_type))
             .and_then(|l| {
-                l.try_into().map_err(|err| JSurferError::ResultOutOfRange {
-                    value: l,
-                    source: err,
-                })
+                l.try_into()
+                    .map_err(|err| JSurferError::ResultOutOfRange { value: l, source: err })
             })
     }
 }
@@ -270,12 +260,7 @@ pub enum JSurferError {
     },
 }
 
-fn type_error(
-    source: jni::errors::Error,
-    method: &str,
-    expected: &str,
-    actual: &str,
-) -> JSurferError {
+fn type_error(source: jni::errors::Error, method: &str, expected: &str, actual: &str) -> JSurferError {
     JSurferError::JavaTypeError {
         method: method.to_owned(),
         expected: expected.to_owned(),

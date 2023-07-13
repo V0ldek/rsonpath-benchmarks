@@ -10,7 +10,7 @@ mod jsonski_extern {
     use libc::{c_char, c_long, c_void};
 
     extern "C" {
-        pub(crate) fn loadFile(file_name: *const c_char) -> *const c_void;
+        pub(crate) fn loadFileMmap(file_name: *const c_char) -> *const c_void;
         pub(crate) fn runJsonSki(query: *const c_char, record: *const c_void) -> c_long;
         pub(crate) fn dropFile(record: *const c_void);
     }
@@ -49,19 +49,17 @@ impl Implementation for JsonSki {
     }
 
     fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error> {
-        let c_file_name =
-            CString::new(file_path).map_err(|err| JsonSkiError::InvalidFilePath { source: err })?;
+        let c_file_name = CString::new(file_path).map_err(|err| JsonSkiError::InvalidFilePath { source: err })?;
 
         unsafe {
-            let record_ptr = jsonski_extern::loadFile(c_file_name.as_ptr());
+            let record_ptr = jsonski_extern::loadFileMmap(c_file_name.as_ptr());
             Ok(JsonSkiRecord { ptr: record_ptr })
         }
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
         Ok(JsonSkiQuery {
-            c_string: CString::new(query)
-                .map_err(|err| JsonSkiError::InvalidQueryString { source: err })?,
+            c_string: CString::new(query).map_err(|err| JsonSkiError::InvalidQueryString { source: err })?,
         })
     }
 
@@ -69,11 +67,10 @@ impl Implementation for JsonSki {
         Ok(unsafe {
             let res = jsonski_extern::runJsonSki(query.c_string.as_ptr(), file.ptr);
 
-            res.try_into()
-                .map_err(|err| JsonSkiError::ResultOutOfRange {
-                    value: res,
-                    source: err,
-                })?
+            res.try_into().map_err(|err| JsonSkiError::ResultOutOfRange {
+                value: res,
+                source: err,
+            })?
         })
     }
 }
