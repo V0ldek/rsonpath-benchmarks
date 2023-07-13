@@ -66,14 +66,18 @@ impl Benchset {
         } else {
             Some(Duration::from_secs(10))
         };
-        let measurement_time = if json_file.size_in_bytes < 1_000_000 {
-            None
-        } else if json_file.size_in_bytes < 10_000_000 {
-            Some(Duration::from_secs(10))
-        } else if json_file.size_in_bytes < 100_000_000 {
-            Some(Duration::from_secs(25))
+
+        // We're aiming for over 1GB/s. Let's say we want to run the query at least 20 times
+        // to get significant results.
+        const TARGET_NUMBER_OF_QUERIES: u64 = 20;
+        const TARGET_SPEED_IN_BYTES_PER_SEC: u64 = 1_000_000_000;
+
+        let measurement_secs =
+            (json_file.size_in_bytes as u64) * TARGET_NUMBER_OF_QUERIES / TARGET_SPEED_IN_BYTES_PER_SEC;
+        let measurement_time = if measurement_secs > 10 {
+            Some(Duration::from_secs(measurement_secs))
         } else {
-            Some(Duration::from_secs(45))
+            None
         };
         let sample_count = if json_file.size_in_bytes < 100_000_000 {
             None
@@ -103,6 +107,11 @@ impl Benchset {
         let bench_fn = target.to_bench_fn_with_id(&self.json_document.file_path, id)?;
         self.implementations.push(bench_fn);
         Ok(self)
+    }
+
+    pub fn add_rsonpath_and_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {
+        self.add_target(BenchTarget::Rsonpath(query))?
+            .add_target(BenchTarget::JsonSki(query))
     }
 
     pub fn add_all_targets_except_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {

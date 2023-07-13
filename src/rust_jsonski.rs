@@ -10,7 +10,7 @@ mod jsonski_extern {
     use libc::{c_char, c_long, c_void};
 
     extern "C" {
-        pub(crate) fn loadFileMmap(file_name: *const c_char) -> *const c_void;
+        pub(crate) fn loadFile(file_name: *const c_char) -> *const c_void;
         pub(crate) fn runJsonSki(query: *const c_char, record: *const c_void) -> c_long;
         pub(crate) fn dropFile(record: *const c_void);
     }
@@ -52,7 +52,7 @@ impl Implementation for JsonSki {
         let c_file_name = CString::new(file_path).map_err(|err| JsonSkiError::InvalidFilePath { source: err })?;
 
         unsafe {
-            let record_ptr = jsonski_extern::loadFileMmap(c_file_name.as_ptr());
+            let record_ptr = jsonski_extern::loadFile(c_file_name.as_ptr());
             Ok(JsonSkiRecord { ptr: record_ptr })
         }
     }

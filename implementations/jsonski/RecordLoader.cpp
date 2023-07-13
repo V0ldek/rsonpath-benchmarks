@@ -8,44 +8,6 @@ using namespace std;
 #define MAX_PAD 64
 
 Record* RecordLoader::loadSingleRecord(char* file_path) {
-    unsigned long size;
-    
-    FILE* fp = fopen (file_path,"rb");
-    if (fp == NULL) {
-        return NULL;
-    }
-    fseek (fp, 0, SEEK_END);
-    size = ftell(fp);
-    rewind(fp);
-    void* p;
-    if (posix_memalign(&p, 64, (size + MAX_PAD + 1)*sizeof(char)) != 0) {
-        cout<<"Fail to allocate memory space for input record."<<endl;
-    }
-    char* record_text = (char*) p;
-    size_t load_size = fread (record_text, 1, size, fp);
-    if (load_size == 0) {
-        cout<<"Fail to load the input record into memory"<<endl;
-    }
-    int remain = 64 - (size % 64);
-    int counter = 0;
-    // pad the input data where its size can be divided by 64
-    while (counter < remain)
-    {
-        record_text[size+counter] = 'd';
-        counter++;
-    }
-    record_text[size+counter]='\0';
-    fclose(fp);
-    // only one single record
-    Record* record = new Record();
-    record->text = record_text;
-    record->rec_start_pos = 0;
-    record->rec_length = strlen(record_text);
-    return record;
-}
-
-Record* RecordLoader::loadSingleRecordMmap(char* file_path) {
-    unsigned long size;
     struct stat sb;
     int fd = open(file_path, O_RDONLY);
     if (fd == -1){
@@ -54,14 +16,20 @@ Record* RecordLoader::loadSingleRecordMmap(char* file_path) {
     if (fstat(fd, &sb) == -1){
         cout << "Error when stating file" << endl;
     }
-    char * buffer = (char *) mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    long size = sb.st_size + MAX_PAD + 1;
+    char *buffer = (char *)mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+    if (buffer == MAP_FAILED) {
+        cout << "Error in mmap" << endl;
+    }
+
+    close(fd);
 
     // only one single record
     Record* record = new Record();
     record->text = buffer;
     record->rec_start_pos = 0;
-    record->rec_length = sb.st_size;
-    close(fd);
+    record->rec_length = size;
     return record;
 }
 

@@ -20,7 +20,6 @@ using namespace std;
 class RecordLoader{
   public:
     static Record* loadSingleRecord(char* file_path);
-    static Record* loadSingleRecordMmap(char* file_path);
     static RecordSet* loadRecords(char* file_path);
 };
 #endif

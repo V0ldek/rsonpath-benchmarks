@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <sys/mman.h>
 #include <vector>
 using namespace std;
 
@@ -30,7 +31,7 @@ struct Record {
 
     ~Record() {
         if (can_delete_text == true && text != NULL) {
-            free(text);
+            munmap(text, rec_length);
             text = NULL;
             can_delete_text = false;
         }

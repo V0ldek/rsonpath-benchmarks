@@ -110,7 +110,7 @@ pub fn inner_array(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 
 pub fn user_second_mention_index(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("user_mentions_indicies", dataset::twitter())?
+    let benchset = Benchset::new("user_mentions_indices", dataset::twitter())?
         .add_target(BenchTarget::Rsonpath("$..entities.user_mentions[1]"))?
         .finish();
 

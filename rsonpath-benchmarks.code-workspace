@@ -8,6 +8,8 @@
 	"settings": {
 		"cSpell.words": [
 			"Benchset",
+			"benchsets",
+			"bestbuy",
 			"bitmasks",
 			"clippy",
 			"clmulepi",
@@ -36,8 +38,11 @@
 			"nonescaped",
 			"nonquoted",
 			"nosimd",
+			"nspl",
+			"openfood",
 			"owo_colors",
 			"Peekable",
+			"pison",
 			"proptest",
 			"regs",
 			"repr",

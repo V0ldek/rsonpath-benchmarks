@@ -5,7 +5,7 @@ use rsonpath::{
     engine::{Compiler, Engine},
     input::MmapInput,
     query::JsonPathQuery,
-    result::CountResult,
+    result::count::CountRecorder,
 };
 use std::{fs, io};
 use thiserror::Error;
@@ -51,7 +51,7 @@ impl Implementation for Rsonpath {
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<u64, Self::Error> {
         query
-            .with_engine(|engine| engine.run::<_, CountResult>(file).map(|x| x.get()))
+            .with_engine(|engine| engine.run::<_, CountRecorder>(file).map(|x| x.get()))
             .map_err(|err| err.into())
     }
 }
