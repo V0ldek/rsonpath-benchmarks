@@ -1,7 +1,8 @@
 use crate::framework::implementation::Implementation;
 use serde_json::Value;
-use serde_json_path::{JsonPath, ParseError};
+use serde_json_path::{JsonPath, NodeList, ParseError};
 use std::{
+    fmt::Display,
     fs,
     io::{self, BufReader},
 };
@@ -9,12 +10,16 @@ use thiserror::Error;
 
 pub struct SerdeJsonPath {}
 
+pub struct SerdeJsonPathResult<'a>(NodeList<'a>);
+
 impl Implementation for SerdeJsonPath {
     type Query = JsonPath;
 
     type File = Value;
 
     type Error = SerdeJsonPathError;
+
+    type Result<'a> = SerdeJsonPathResult<'a>;
 
     fn id() -> &'static str {
         "serde_json_path"
@@ -36,8 +41,18 @@ impl Implementation for SerdeJsonPath {
         JsonPath::parse(query).map_err(SerdeJsonPathError::JsonPathParseError)
     }
 
-    fn run(&self, query: &Self::Query, file: &Self::File) -> Result<u64, Self::Error> {
-        Ok(query.query(file).len() as u64)
+    fn run<'a>(&self, query: &Self::Query, file: &'a Self::File) -> Result<Self::Result<'a>, Self::Error> {
+        Ok(SerdeJsonPathResult(query.query(file)))
+    }
+}
+
+impl<'a> Display for SerdeJsonPathResult<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for res in self.0.iter() {
+            writeln!(f, "{res}")?;
+        }
+
+        Ok(())
     }
 }
 

@@ -172,6 +172,8 @@ impl Implementation for JSurfer {
 
     type Error = JSurferError;
 
+    type Result<'a> = u64; // FIXME
+
     fn id() -> &'static str {
         "jsurfer"
     }

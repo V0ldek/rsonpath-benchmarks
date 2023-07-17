@@ -1,7 +1,10 @@
+use std::fmt::Display;
+
 pub trait Implementation: Sized {
     type Query;
     type File;
     type Error: std::error::Error + Sync + Send + 'static;
+    type Result<'a> : Display;
 
     fn id() -> &'static str;
 
@@ -11,7 +14,7 @@ pub trait Implementation: Sized {
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error>;
 
-    fn run(&self, query: &Self::Query, file: &Self::File) -> Result<u64, Self::Error>;
+    fn run<'a>(&self, query: &'a Self::Query, file: &'a Self::File) -> Result<Self::Result<'a>, Self::Error>;
 }
 
 pub struct PreparedQuery<I: Implementation> {

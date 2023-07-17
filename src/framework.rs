@@ -218,7 +218,7 @@ impl<'a> Target for BenchTarget<'a> {
 trait BenchFn {
     fn id(&self) -> &str;
 
-    fn run(&self) -> u64;
+    fn run(&self);
 }
 
 impl<I: Implementation> BenchFn for PreparedQuery<I> {
@@ -226,9 +226,10 @@ impl<I: Implementation> BenchFn for PreparedQuery<I> {
         self.id
     }
 
-    fn run(&self) -> u64 {
+    fn run(&self) {
         let file = self.implementation.load_file(&self.file_path).unwrap();
-        self.implementation.run(&self.query, &file).unwrap()
+        let result = self.implementation.run(&self.query, &file).unwrap();
+        criterion::black_box(result);
     }
 }
 

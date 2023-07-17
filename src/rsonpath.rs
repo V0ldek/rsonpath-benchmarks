@@ -1,11 +1,13 @@
 use crate::framework::implementation::Implementation;
 use ouroboros::self_referencing;
-use rsonpath::engine::main::MainEngine;
+use rsonpath::{
+    engine::main::MainEngine,
+    result::nodes::{NodesRecorder, NodesResult},
+};
 use rsonpath::{
     engine::{Compiler, Engine},
     input::MmapInput,
     query::JsonPathQuery,
-    result::count::CountRecorder,
 };
 use std::{fs, io};
 use thiserror::Error;
@@ -26,6 +28,8 @@ impl Implementation for Rsonpath {
     type File = MmapInput;
 
     type Error = RsonpathError;
+
+    type Result<'a> = NodesResult;
 
     fn id() -> &'static str {
         "rsonpath"
@@ -49,9 +53,9 @@ impl Implementation for Rsonpath {
         Ok(rsonpath)
     }
 
-    fn run(&self, query: &Self::Query, file: &Self::File) -> Result<u64, Self::Error> {
+    fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
         query
-            .with_engine(|engine| engine.run::<_, CountRecorder>(file).map(|x| x.get()))
+            .with_engine(|engine| engine.run::<_, NodesRecorder>(file))
             .map_err(|err| err.into())
     }
 }

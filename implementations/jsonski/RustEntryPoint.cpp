@@ -16,14 +16,19 @@ Record *loadFile(char *file_path)
     return rec;
 }
 
-long runJsonSki(char *query, Record *record)
+Result *runJsonSki(char *query, Record *record)
 {
     QueryProcessor processor(query);
 
-    return processor.runQuery(record);
+    return new Result(processor.runQuery(record));
 }
 
 void dropFile(Record *record)
 {
     delete record;
+}
+
+void dropResult(Result *result)
+{
+    delete result;
 }

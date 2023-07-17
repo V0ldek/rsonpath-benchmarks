@@ -2,17 +2,19 @@ use crate::framework::implementation::Implementation;
 use libc::c_void;
 use std::{
     ffi::{CString, NulError},
+    fmt::Display,
     num::TryFromIntError,
 };
 use thiserror::Error;
 
 mod jsonski_extern {
-    use libc::{c_char, c_long, c_void};
+    use libc::{c_char, c_void};
 
     extern "C" {
         pub(crate) fn loadFile(file_name: *const c_char) -> *const c_void;
-        pub(crate) fn runJsonSki(query: *const c_char, record: *const c_void) -> c_long;
+        pub(crate) fn runJsonSki(query: *const c_char, record: *const c_void) -> *const c_void;
         pub(crate) fn dropFile(record: *const c_void);
+        pub(crate) fn dropResult(result: *const c_void);
     }
 }
 
@@ -31,6 +33,16 @@ pub struct JsonSkiQuery {
     c_string: CString,
 }
 
+pub struct JsonSkiResult {
+    ptr: *const c_void,
+}
+
+impl Drop for JsonSkiResult {
+    fn drop(&mut self) {
+        unsafe { jsonski_extern::dropResult(self.ptr) }
+    }
+}
+
 pub struct JsonSki {}
 
 impl Implementation for JsonSki {
@@ -39,6 +51,8 @@ impl Implementation for JsonSki {
     type File = JsonSkiRecord;
 
     type Error = JsonSkiError;
+
+    type Result<'a> = JsonSkiResult;
 
     fn id() -> &'static str {
         "jsonski"
@@ -63,15 +77,18 @@ impl Implementation for JsonSki {
         })
     }
 
-    fn run(&self, query: &Self::Query, file: &Self::File) -> Result<u64, Self::Error> {
+    fn run(&self, query: &Self::Query, file: &Self::File) -> Result<JsonSkiResult, Self::Error> {
         Ok(unsafe {
             let res = jsonski_extern::runJsonSki(query.c_string.as_ptr(), file.ptr);
 
-            res.try_into().map_err(|err| JsonSkiError::ResultOutOfRange {
-                value: res,
-                source: err,
-            })?
+            JsonSkiResult { ptr: res }
         })
+    }
+}
+
+impl Display for JsonSkiResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[opaque JSONSki result]")
     }
 }
 

@@ -25,6 +25,7 @@ using namespace std;
 QueryProcessor::QueryProcessor(string query) {
     this->qa = QueryAutomaton();
     JSONPathParser::updateQueryAutomaton(query, this->qa);
+    this->mOutput.clear();
     this->mNumMatches = 0;
     this->mText = new char[MAX_TEXT_LENGTH];
     init(); 
@@ -55,7 +56,8 @@ void QueryProcessor::init() {
     colonbit = 0; quotebit = 0; commabit = 0; bracketbit = 0;
     cur_word = false;
     top_word = -1;
-    cur_pos = 0; 
+    cur_pos = 0;
+    this->mOutput.clear();
 }
 
 QueryProcessor::~QueryProcessor()
@@ -1046,6 +1048,12 @@ void QueryProcessor::object(long& pos, bitmap& bm) {
                     goOverPriAttr(pos, bm);
                     ++pos;
             }
+            long end_pos = pos;
+            long text_length = end_pos - start_pos + 1;
+            memcpy(mText, mRecord + start_pos, text_length);
+            mText[text_length] = '\0';
+            mOutput.append(mText);
+            mOutput.append(";");
             if (mRecord[pos] != '}') {
                 if (qa.getStackSize() == 0) return;
                 goToObjEnd(pos, bm);
@@ -1110,6 +1118,12 @@ void QueryProcessor::array(long& pos, bitmap& bm) {
                         }
                     }
                 }
+                long end_pos = pos;
+                long text_length = end_pos - start_pos + 1;
+                memcpy(mText, mRecord + start_pos, text_length);
+                mText[text_length] = '\0';
+                mOutput.append(mText);
+                mOutput.append(";");
                 if (break_while) {
                     if (mRecord[pos] != ']')
                         goToAryEnd(pos, bm);
@@ -1179,6 +1193,12 @@ void QueryProcessor::array(long& pos, bitmap& bm) {
                         }
                     }
                 }
+                long end_pos = pos;
+                long text_length = end_pos - start_pos + 1;
+                memcpy(mText, mRecord + start_pos, text_length);
+                mText[text_length] = '\0';
+                mOutput.append(mText);
+                mOutput.append(";");
                 if (break_while) break;
             } else if (qa.mCurState > 0) {
                 if (getElementType(pos) != element_type) {
@@ -1220,7 +1240,7 @@ long QueryProcessor::getOutputMatchesNum() {
     return mNumMatches;
 }
 
-long QueryProcessor::runQuery(Record* rec) {
+string QueryProcessor::runQuery(Record* rec) {
     setRecordText(rec->text + rec->rec_start_pos, rec->rec_length);
     init();
     long cur_pos = 0;
@@ -1230,5 +1250,5 @@ long QueryProcessor::runQuery(Record* rec) {
         object(cur_pos, bm);
     else if(ch == '[' && qa.typeExpectedInArr() != NONE)
         array(cur_pos, bm);
-    return mNumMatches;
+    return mOutput;
 }
