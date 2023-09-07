@@ -1,12 +1,15 @@
 use crate::framework::implementation::Implementation;
 use ouroboros::self_referencing;
-use rsonpath::{engine::main::MainEngine, result::Match};
+use rsonpath::{
+    engine::main::MainEngine,
+    result::{Match, Sink},
+};
 use rsonpath::{
     engine::{Compiler, Engine},
     input::MmapInput,
     query::JsonPathQuery,
 };
-use std::{fmt::Display, fs, io};
+use std::{convert::Infallible, fmt::Display, fs, io};
 use thiserror::Error;
 
 pub struct Rsonpath {}
@@ -26,7 +29,7 @@ impl Implementation for Rsonpath {
 
     type Error = RsonpathError;
 
-    type Result<'a> = MatchDisplay;
+    type Result<'a> = &'static str;
 
     fn id() -> &'static str {
         "rsonpath"
@@ -51,11 +54,11 @@ impl Implementation for Rsonpath {
     }
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
-        let mut result = vec![];
         query
-            .with_engine(|engine| engine.matches(file, &mut result))
+            .with_engine(|engine| engine.matches(file, &mut VoidSink))
             .map_err(RsonpathError::EngineError)?;
-        Ok(MatchDisplay(result))
+
+        Ok("[not collected]")
     }
 }
 
@@ -88,6 +91,16 @@ impl Display for MatchDisplay {
             writeln!(f, "{m}")?
         }
 
+        Ok(())
+    }
+}
+
+struct VoidSink;
+
+impl<D> Sink<D> for VoidSink {
+    type Error = Infallible;
+
+    fn add_match(&mut self, _data: D) -> Result<(), Self::Error> {
         Ok(())
     }
 }

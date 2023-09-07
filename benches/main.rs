@@ -23,7 +23,7 @@ pub fn ast_deepest(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 
 pub fn bestbuy_products_category(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("bestbuy::products_category", dataset::pison_bestbuy_large())?
+    let benchset = Benchset::new("bestbuy::products_category", dataset::pison_bestbuy_short())?
         .add_target(BenchTarget::Rsonpath("$.products[*].categoryPath[*].id"))?
         .finish();
 
@@ -33,7 +33,7 @@ pub fn bestbuy_products_category(c: &mut Criterion) -> Result<(), BenchmarkError
 }
 
 pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("bestbuy::products_video_only", dataset::pison_bestbuy_large())?
+    let benchset = Benchset::new("bestbuy::products_video_only", dataset::pison_bestbuy_short())?
         .add_target_with_id(BenchTarget::Rsonpath("$.products[*].videoChapters"), "rsonpath_direct")?
         .add_target_with_id(BenchTarget::Rsonpath("$..videoChapters"), "rsonpath_descendant")?
         .finish();
@@ -44,7 +44,7 @@ pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkErr
 }
 
 pub fn bestbuy_all_nodes(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("bestbuy::all_nodes", dataset::pison_bestbuy_large())?
+    let benchset = Benchset::new("bestbuy::all_nodes", dataset::pison_bestbuy_short())?
         .add_target(BenchTarget::Rsonpath("$..*"))?
         .finish();
 
@@ -54,7 +54,7 @@ pub fn bestbuy_all_nodes(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 
 pub fn google_map_routes(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("google_map::routes", dataset::pison_google_map())?
+    let benchset = Benchset::new("google_map::routes", dataset::pison_google_map_short())?
         .add_target(BenchTarget::Rsonpath("$[*].routes[*].legs[*].steps[*].distance.text"))?
         .finish();
 
@@ -64,7 +64,7 @@ pub fn google_map_routes(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 
 pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("google_map::travel_modes", dataset::pison_google_map())?
+    let benchset = Benchset::new("google_map::travel_modes", dataset::pison_google_map_short())?
         .add_target_with_id(BenchTarget::Rsonpath("$[*].available_travel_modes"), "rsonpath_direct")?
         .add_target_with_id(
             BenchTarget::Rsonpath("$..available_travel_modes"),
@@ -78,7 +78,7 @@ pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> 
 }
 
 pub fn walmart_items_name(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("walmart::items_name", dataset::pison_walmart())?
+    let benchset = Benchset::new("walmart::items_name", dataset::pison_walmart_short())?
         .add_target_with_id(BenchTarget::Rsonpath("$.items[*].name"), "rsonpath_direct")?
         .add_target_with_id(BenchTarget::Rsonpath("$..items_name"), "rsonpath_descendant")?
         .finish();

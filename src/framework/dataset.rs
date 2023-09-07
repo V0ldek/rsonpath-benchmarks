@@ -348,7 +348,19 @@ pub const fn pison_bestbuy_large() -> Dataset {
     }
 }
 
-pub const fn pison_google_map() -> Dataset {
+pub const fn pison_bestbuy_short() -> Dataset {
+    Dataset {
+        name: "pison_bestbuy_short",
+        path: dataset_path!("pison/bestbuy_short_record.json"),
+        source: DatasetSource::UrlArchive(DatasetArchive {
+            url: "https://zenodo.org/record/8327309/files/bestbuy_short.json.gz",
+            checksum: hex!("6587d37e3d47e8a5bb3ac29d45121ea287b49d7eaeb8af568034c0fe0b83fa23"),
+        }),
+        checksum: hex!("ca0ec3d84e2212c20b50bce81e69d5cba6c3131a0fe6d47580c97a145be662b2"),
+    }
+}
+
+pub const fn pison_google_map_large() -> Dataset {
     Dataset {
         name: "pison_google_map",
         path: dataset_path!("pison/google_map_large_record.json"),
@@ -357,6 +369,18 @@ pub const fn pison_google_map() -> Dataset {
             checksum: hex!("bff82147ec42186a016615e888c1e009f306ab0599db20afdf102cb95e6f6e5b"),
         }),
         checksum: hex!("cdbc090edf4faeea80d917e3a2ff618fb0a42626eeac5a4521dae471e4f53574"),
+    }
+}
+
+pub const fn pison_google_map_short() -> Dataset {
+    Dataset {
+        name: "pison_google_map_short",
+        path: dataset_path!("pison/google_map_short_record.json"),
+        source: DatasetSource::UrlArchive(DatasetArchive {
+            url: "https://zenodo.org/record/8327309/files/google_map_short.json.gz",
+            checksum: hex!("392d50e7eedfdf13c71e1f7a74a3bb15df85b5988ebc83fc182aec81cf3dece9"),
+        }),
+        checksum: hex!("8a23f138d97bbc35572ff04acacfe82877eab0c0f410741c1a9e52a0ad2a48c1"),
     }
 }
 
@@ -372,7 +396,7 @@ pub const fn pison_nspl() -> Dataset {
     }
 }
 
-pub const fn pison_twitter() -> Dataset {
+pub const fn pison_twitter_large() -> Dataset {
     Dataset {
         name: "pison_twitter",
         path: dataset_path!("pison/twitter_large_record.json"),
@@ -384,7 +408,19 @@ pub const fn pison_twitter() -> Dataset {
     }
 }
 
-pub const fn pison_walmart() -> Dataset {
+pub const fn pison_twitter_short() -> Dataset {
+    Dataset {
+        name: "pison_twitter_short",
+        path: dataset_path!("pison/twitter_short_record.json"),
+        source: DatasetSource::UrlArchive(DatasetArchive {
+            url: "https://zenodo.org/record/8327309/files/twitter_short.json.gz",
+            checksum: hex!("7d6cde2fe297783338cc507ad8046c3e8e0a905e809bde6af64b73f9bb75afe8"),
+        }),
+        checksum: hex!("177b1764cade21af7b4962f23836431dab9c0beb320bdbff11bb6c8006f360cb"),
+    }
+}
+
+pub const fn pison_walmart_large() -> Dataset {
     Dataset {
         name: "pison_walmart",
         path: dataset_path!("pison/walmart_large_record.json"),
@@ -393,6 +429,18 @@ pub const fn pison_walmart() -> Dataset {
             checksum: hex!("3ba4309dd620463045a3996596805f738ead2b257cf7152ea6b1f8ab339e71f4"),
         }),
         checksum: hex!("ebad2cf96871a1c2277c2a19dcc5818f9c2aed063bc8a56459f378024c5a6e14"),
+    }
+}
+
+pub const fn pison_walmart_short() -> Dataset {
+    Dataset {
+        name: "pison_walmart_short",
+        path: dataset_path!("pison/walmart_short_record.json"),
+        source: DatasetSource::UrlArchive(DatasetArchive {
+            url: "https://zenodo.org/record/8327309/files/walmart_short.json.gz",
+            checksum: hex!("e0c4163bfb1da0cbcaf2cc0d26318b0d380bd5defb64113510ea7319d64a252b"),
+        }),
+        checksum: hex!("acf0afde1e83cd0a2dde829b63846acb6cf98fc7c9d210f3c230c285b903aff6"),
     }
 }
 

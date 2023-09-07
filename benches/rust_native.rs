@@ -11,7 +11,7 @@ pub fn ast_decl_inner(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 
 pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("bestbuy::products_video_only", dataset::pison_bestbuy_large())?
+    let benchset = Benchset::new("bestbuy::products_video_only", dataset::pison_bestbuy_short())?
         .add_target_with_id(BenchTarget::Rsonpath("$.products[*].videoChapters"), "rsonpath_direct")?
         .add_target_with_id(BenchTarget::Rsonpath("$..videoChapters"), "rsonpath_descendant")?
         .add_target_with_id(
@@ -38,7 +38,7 @@ pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkErr
 }
 
 pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("google_map::travel_modes", dataset::pison_google_map())?
+    let benchset = Benchset::new("google_map::travel_modes", dataset::pison_google_map_short())?
         .add_target_with_id(BenchTarget::Rsonpath("$[*].available_travel_modes"), "rsonpath_direct")?
         .add_target_with_id(
             BenchTarget::Rsonpath("$..available_travel_modes"),

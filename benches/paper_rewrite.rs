@@ -34,7 +34,7 @@ pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkErr
 }
 
 pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("GMD2'_travel_modes", dataset::pison_google_map())?
+    let benchset = Benchset::new("GMD2'_travel_modes", dataset::pison_google_map_large())?
         .add_target(BenchTarget::Rsonpath("$..available_travel_modes"))?
         .add_target(BenchTarget::JsonSki("$[*].available_travel_modes"))?
         .finish();
@@ -45,7 +45,7 @@ pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> 
 }
 
 pub fn walmart_items_price(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("WM1'_items_price", dataset::pison_walmart())?
+    let benchset = Benchset::new("WM1'_items_price", dataset::pison_walmart_large())?
         .add_target(BenchTarget::Rsonpath("$..bestMarketplacePrice.price"))?
         .add_target(BenchTarget::JsonSki("$.items[*].bestMarketplacePrice.price"))?
         .finish();
@@ -56,7 +56,7 @@ pub fn walmart_items_price(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 
 pub fn walmart_items_name(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("WM2'_items_name", dataset::pison_walmart())?
+    let benchset = Benchset::new("WM2'_items_name", dataset::pison_walmart_large())?
         .add_target(BenchTarget::Rsonpath("$..name"))?
         .add_target(BenchTarget::JsonSki("$.items[*].name"))?
         .finish();

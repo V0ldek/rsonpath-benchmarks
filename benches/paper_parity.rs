@@ -1,7 +1,7 @@
 use rsonpath_benchmarks::prelude::*;
 
 pub fn twitter_entities_urls(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("TT1_entities_urls", dataset::pison_twitter())?
+    let benchset = Benchset::new("TT1_entities_urls", dataset::pison_twitter_large())?
         .add_rsonpath_and_jsonski("$[*].entities.urls[*].url")?
         .finish();
 
@@ -11,7 +11,7 @@ pub fn twitter_entities_urls(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 
 pub fn twitter_text(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("TT2_text", dataset::pison_twitter())?
+    let benchset = Benchset::new("TT2_text", dataset::pison_twitter_large())?
         .add_rsonpath_and_jsonski("$[*].text")?
         .finish();
 
@@ -51,7 +51,7 @@ pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkErr
 }
 
 pub fn google_map_routes(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("GMD1_routes", dataset::pison_google_map())?
+    let benchset = Benchset::new("GMD1_routes", dataset::pison_google_map_large())?
         .add_rsonpath_and_jsonski("$[*].routes[*].legs[*].steps[*].distance.text")?
         .finish();
 
@@ -61,7 +61,7 @@ pub fn google_map_routes(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 
 pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("GMD2_travel_modes", dataset::pison_google_map())?
+    let benchset = Benchset::new("GMD2_travel_modes", dataset::pison_google_map_large())?
         .add_rsonpath_and_jsonski("$[*].available_travel_modes")?
         .finish();
 
@@ -91,7 +91,7 @@ pub fn nspl_data(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 
 pub fn walmart_items_price(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("WM1_items_price", dataset::pison_walmart())?
+    let benchset = Benchset::new("WM1_items_price", dataset::pison_walmart_large())?
         .add_rsonpath_and_jsonski("$.items[*].bestMarketplacePrice.price")?
         .finish();
 
@@ -101,7 +101,7 @@ pub fn walmart_items_price(c: &mut Criterion) -> Result<(), BenchmarkError> {
 }
 
 pub fn walmart_items_name(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("WM2_items_name", dataset::pison_walmart())?
+    let benchset = Benchset::new("WM2_items_name", dataset::pison_walmart_large())?
         .add_rsonpath_and_jsonski("$.items[*].name")?
         .finish();
 
