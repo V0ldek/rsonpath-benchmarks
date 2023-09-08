@@ -2,7 +2,7 @@ use clap::{Parser, ValueEnum};
 use color_eyre::eyre::Result;
 use rsonpath_benchmarks::framework::implementation::Implementation;
 use rsonpath_benchmarks::{
-    jsonpath_rust::JsonpathRust, rsonpath::Rsonpath, rust_jsonski::JsonSki, rust_jsurfer::JSurfer,
+    jsonpath_rust::JsonpathRust, rsonpath::RsonpathMmap, rust_jsonski::JsonSki, rust_jsurfer::JSurfer,
     serde_json_path::SerdeJsonPath,
 };
 
@@ -11,7 +11,7 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     match args.engine {
-        ImplArg::Rsonpath => run(Rsonpath::new()?, &args.query, &args.file_path),
+        ImplArg::Rsonpath => run(RsonpathMmap::new()?, &args.query, &args.file_path),
         ImplArg::JsonSki => run(JsonSki::new()?, &args.query, &args.file_path),
         ImplArg::JSurfer => run(JSurfer::new()?, &args.query, &args.file_path),
         ImplArg::JsonpathRust => run(JsonpathRust::new()?, &args.query, &args.file_path),

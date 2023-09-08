@@ -481,5 +481,9 @@ pub enum DatasetError {
 }
 
 fn format_hex_string(bytes: &[u8]) -> impl Display {
-    bytes.iter().map(|b| format!("{b:02x}")).collect::<String>()
+    use std::fmt::Write;
+    bytes.iter().fold(String::new(), |mut f, b| {
+        let _ = write!(f, "{b:02x}");
+        f
+    })
 }
