@@ -2,7 +2,7 @@ use self::implementation::prepare;
 use self::{benchmark_options::BenchmarkOptions, implementation::prepare_with_id};
 use crate::{
     jsonpath_rust::{JsonpathRust, JsonpathRustError},
-    rsonpath::{Rsonpath, RsonpathMmap, RsonpathError},
+    rsonpath::{Rsonpath, RsonpathError, RsonpathMmap},
     rust_jsonski::{JsonSki, JsonSkiError},
     rust_jsurfer::{JSurfer, JSurferError},
     serde_json_path::{SerdeJsonPath, SerdeJsonPathError},
