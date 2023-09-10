@@ -1,15 +1,19 @@
 use crate::framework::implementation::Implementation;
 use ouroboros::self_referencing;
-use rsonpath::{engine::main::MainEngine, result::Match};
+use rsonpath::{
+    engine::main::MainEngine,
+    result::{Match, Sink},
+};
 use rsonpath::{
     engine::{Compiler, Engine},
-    input::MmapInput,
+    input::{MmapInput, OwnedBytes},
     query::JsonPathQuery,
 };
-use std::{fmt::Display, fs, io};
+use std::{convert::Infallible, fmt::Display, fs, io};
 use thiserror::Error;
 
 pub struct Rsonpath {}
+pub struct RsonpathMmap {}
 
 #[self_referencing()]
 pub struct RsonpathQuery {
@@ -22,11 +26,11 @@ pub struct RsonpathQuery {
 impl Implementation for Rsonpath {
     type Query = RsonpathQuery;
 
-    type File = MmapInput;
+    type File = OwnedBytes;
 
     type Error = RsonpathError;
 
-    type Result<'a> = MatchDisplay;
+    type Result<'a> = &'static str;
 
     fn id() -> &'static str {
         "rsonpath"
@@ -37,7 +41,10 @@ impl Implementation for Rsonpath {
     }
 
     fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error> {
-        rsonpath_load_file(file_path)
+        let file = fs::read_to_string(file_path)?;
+        let input = OwnedBytes::new(&file.as_bytes())?;
+
+        Ok(input)
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
@@ -51,19 +58,55 @@ impl Implementation for Rsonpath {
     }
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
-        let mut result = vec![];
         query
-            .with_engine(|engine| engine.matches(file, &mut result))
+            .with_engine(|engine| engine.matches(file, &mut VoidSink))
             .map_err(RsonpathError::EngineError)?;
-        Ok(MatchDisplay(result))
+
+        Ok("[not collected]")
     }
 }
 
-fn rsonpath_load_file(file_path: &str) -> Result<MmapInput, RsonpathError> {
-    let file = fs::File::open(file_path)?;
-    let input = unsafe { MmapInput::map_file(&file)? };
+impl Implementation for RsonpathMmap {
+    type Query = RsonpathQuery;
 
-    Ok(input)
+    type File = MmapInput;
+
+    type Error = RsonpathError;
+
+    type Result<'a> = &'static str;
+
+    fn id() -> &'static str {
+        "rsonpath"
+    }
+
+    fn new() -> Result<Self, Self::Error> {
+        Ok(RsonpathMmap {})
+    }
+
+    fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error> {
+        let file = fs::File::open(file_path)?;
+        let input = unsafe { MmapInput::map_file(&file)? };
+
+        Ok(input)
+    }
+
+    fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
+        let query = JsonPathQuery::parse(query).unwrap();
+
+        let rsonpath = RsonpathQuery::try_new(query, |query| {
+            MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
+        })?;
+
+        Ok(rsonpath)
+    }
+
+    fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
+        query
+            .with_engine(|engine| engine.matches(file, &mut VoidSink))
+            .map_err(RsonpathError::EngineError)?;
+
+        Ok("[not collected]")
+    }
 }
 
 #[derive(Error, Debug)]
@@ -88,6 +131,16 @@ impl Display for MatchDisplay {
             writeln!(f, "{m}")?
         }
 
+        Ok(())
+    }
+}
+
+struct VoidSink;
+
+impl<D> Sink<D> for VoidSink {
+    type Error = Infallible;
+
+    fn add_match(&mut self, _data: D) -> Result<(), Self::Error> {
         Ok(())
     }
 }

@@ -2,8 +2,9 @@ use crate::framework::implementation::Implementation;
 use jsonpath_rust::{parser::model::JsonPath, path::json_path_instance, JsonPathValue};
 use serde_json::Value;
 use std::{
+    fmt::Display,
     fs,
-    io::{self, BufReader}, fmt::Display,
+    io::{self, BufReader},
 };
 use thiserror::Error;
 
