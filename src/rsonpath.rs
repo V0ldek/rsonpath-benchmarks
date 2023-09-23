@@ -102,7 +102,7 @@ impl Implementation for RsonpathMmap {
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
         query
-            .with_engine(|engine| engine.matches(file, &mut VoidSink))
+            .with_engine(|engine| engine.count(file))
             .map_err(RsonpathError::EngineError)?;
 
         Ok("[not collected]")

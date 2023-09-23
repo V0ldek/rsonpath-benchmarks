@@ -20,7 +20,7 @@ Result *runJsonSki(char *query, Record *record)
 {
     QueryProcessor processor(query);
 
-    return new Result(processor.runQuery(record));
+    return new Result(std::to_string(processor.runQuery(record)));
 }
 
 void dropFile(Record *record)

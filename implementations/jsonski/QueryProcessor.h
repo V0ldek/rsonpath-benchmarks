@@ -69,7 +69,7 @@ class QueryProcessor {
     ~QueryProcessor();
     long getOutputMatchesNum();
     // execute query on one single JSON record
-    string runQuery(Record* rec);
+    long runQuery(Record* rec);
 
   private:
     void init();
@@ -180,6 +180,5 @@ class QueryProcessor {
     long mWordId;
     QueryAutomaton qa;
     long mNumMatches;
-    string mOutput;
 };
 #endif
