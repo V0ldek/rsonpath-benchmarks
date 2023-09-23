@@ -31,7 +31,7 @@ struct Record {
 
     ~Record() {
         if (can_delete_text == true && text != NULL) {
-            munmap(text, rec_length);
+            free(text);
             text = NULL;
             can_delete_text = false;
         }

@@ -120,26 +120,26 @@ impl Benchset {
     }
 
     pub fn add_rsonpath_and_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {
-        self.add_target(BenchTarget::RsonpathMmap(query))?
+        self.add_target(BenchTarget::Rsonpath(query))?
             .add_target(BenchTarget::JsonSki(query))
     }
 
     pub fn add_all_targets_except_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {
-        self.add_target(BenchTarget::RsonpathMmap(query))?
+        self.add_target(BenchTarget::Rsonpath(query))?
             .add_target(BenchTarget::JSurfer(query))?
             .add_target(BenchTarget::JsonpathRust(query))?
             .add_target(BenchTarget::SerdeJsonPath(query))
     }
 
     pub fn add_all_targets_except_jsurfer(self, query: &str) -> Result<Self, BenchmarkError> {
-        self.add_target(BenchTarget::RsonpathMmap(query))?
+        self.add_target(BenchTarget::Rsonpath(query))?
             .add_target(BenchTarget::JsonSki(query))?
             .add_target(BenchTarget::JsonpathRust(query))?
             .add_target(BenchTarget::SerdeJsonPath(query))
     }
 
     pub fn add_all_targets(self, query: &str) -> Result<Self, BenchmarkError> {
-        self.add_target(BenchTarget::RsonpathMmap(query))?
+        self.add_target(BenchTarget::Rsonpath(query))?
             .add_target(BenchTarget::JsonSki(query))?
             .add_target(BenchTarget::JSurfer(query))?
             .add_target(BenchTarget::JsonpathRust(query))?
@@ -147,7 +147,7 @@ impl Benchset {
     }
 
     pub fn add_rust_native_targets(self, query: &str) -> Result<Self, BenchmarkError> {
-        self.add_target(BenchTarget::RsonpathMmap(query))?
+        self.add_target(BenchTarget::Rsonpath(query))?
             .add_target(BenchTarget::JsonpathRust(query))?
             .add_target(BenchTarget::SerdeJsonPath(query))
     }
