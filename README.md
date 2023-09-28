@@ -91,39 +91,20 @@ cargo bench --bench <dataset> --config 'patch.crates-io.rsonpath.path = "../rson
 
 ## Plotting
 
+To prepare the plotting, assuming `venv` is installed:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Alternatively, you need `pandas` and `matplotlib` module installed.
+
 To plot the result once the is bench done:
 
 ```bash
-python3 charts/charts.py
+python3 -m chart target/criterion -o output/ 
 ```
 
-You can also provide a path to a `criterion` folder with results:
-
-```bash
-python3 charts/charts.py exps/chetemi
-```
-
-The plot will be saved in the `plot.png` file of the current directory.
-
-## Statistics
-
-Two statistics scripts are available:
-
-* One about the dataset:
-
-```python
-python3 charts/dataset_stat.py
-```
-
-It will plot some informations about each JSON file in the `data` folder. Be aware that it will
-load the file in memory, in Python. Expect it to be slow and memory consumming.
-
-* One about the queries:
-
-```python
-python3 charts/queries_stat.py
-```
-
-This script will assume you've run the benchmark to extract the list
-of queries from `target/criterion`. It will then compute some parameters and the number of query results with `rsonpath`.
-The binary of `rsonpath` should be in the path (run `cargo install rsonpath`).
+The output folder will contains several png files and a csv file with the results.

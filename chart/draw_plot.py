@@ -107,7 +107,7 @@ def generate_graphs_exp(path, outpath):
 
 def generate_graphs(df0, outpath):
 
-    df = df0[["jsurfer", "jsonski", "rsonpath"]].rename(dict(rsonpath="simdpath"), axis=1).drop("N1")
+    df = df0[["jsurfer", "jsonski", "rsonpath"]].rename(dict(rsonpath="simdpath"), axis=1).drop("N1", errors="ignore")
 
     df1 = df.filter(items=ei.jsonski_vs_rsonpath, axis=0)
     fig = plot_from_dataframe(df1)
