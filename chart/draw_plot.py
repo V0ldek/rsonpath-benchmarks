@@ -22,7 +22,7 @@ def print_plot(rsonpath, jsurfer, jsonski, exp_label, fileout="plot.png"):
 
     width = width/ratio
 
-    bar = ax1.bar(pos+width/2+0.03, rsonpath, label="simdpath", width=width, color="tab:blue", zorder=4)
+    bar = ax1.bar(pos+width/2+0.03, rsonpath, label="rsonpath", width=width, color="tab:blue", zorder=4)
     ax1.set_xticks(pos)
     ax1.set_xticklabels(exp_label)
     ax1.bar_label(bar, [f"{e:0.0f}" for e in rsonpath/jsurfer])
@@ -43,14 +43,14 @@ def print_plot(rsonpath, jsurfer, jsonski, exp_label, fileout="plot.png"):
 def plot_from_dataframe(df,
 	 keys=None,
 	 width=0.8,
-	 colors=dict(simdpath="tab:blue",
+	 colors=dict(rsonpath="tab:blue",
     	 jsonski="tab:red",
 	     rewritten_s="tab:green",
 	     rewritten_s2="tab:olive",
          jsurfer="tab:gray",
          rewritten_j="tab:brown"
      ),
-	 labels = dict(rewritten_s="simdpath (rewritten)", rewritten_s2="simdpath (partial)", rewritten_j="jsurfer (rewritten)")):
+	 labels = dict(rewritten_s="rsonpath (rewritten)", rewritten_s2="rsonpath (partial)", rewritten_j="jsurfer (rewritten)")):
 
     keys = list(df) if not keys else keys
     plot.rcParams.update({
@@ -107,19 +107,19 @@ def generate_graphs_exp(path, outpath):
 
 def generate_graphs(df0, outpath):
 
-    df = df0[["jsurfer", "jsonski", "rsonpath"]].rename(dict(rsonpath="simdpath"), axis=1).drop("N1", errors="ignore")
+    df = df0[["jsurfer", "jsonski", "rsonpath"]].rename(dict(rsonpath="rsonpath"), axis=1).drop("N1", errors="ignore")
 
     df1 = df.filter(items=ei.jsonski_vs_rsonpath, axis=0)
     fig = plot_from_dataframe(df1)
-    fig.savefig(outpath+"/simdpath_vs_jsonski.png", bbox_inches='tight')
+    fig.savefig(outpath+"/main.png", bbox_inches='tight')
 
     query_orig = list(map(lambda e:e[:-1], ei.query_rewritten))
     df2 = df.filter(items=query_orig, axis=0)
-    df3 = df.filter(items=ei.query_rewritten, axis=0)[["simdpath", "jsurfer"]]
+    df3 = df.filter(items=ei.query_rewritten, axis=0)[["rsonpath", "jsurfer"]]
     df2[["rewritten_s", "rewritten_j"]] = df3.rename(lambda e:e[:-1])
-    df2 = df2[["jsurfer", "rewritten_j", "jsonski", "simdpath", "rewritten_s"]]
+    df2 = df2[["jsurfer", "rewritten_j", "jsonski", "rsonpath", "rewritten_s"]]
     fig = plot_from_dataframe(df2)
-    fig.savefig(outpath+"/query_rewritten.png", bbox_inches='tight')
+    fig.savefig(outpath+"/rewrite.png", bbox_inches='tight')
 
     
     query = ["C2", "C3", "Ts"]
@@ -132,14 +132,14 @@ def generate_graphs(df0, outpath):
         "Tsr",
     ]
     query_partial = ["Tsp"]
-    df4 = df.filter(items=query_rewritten, axis=0)[["simdpath"]].rename(lambda e:e[:-1] if e[-1] == "r" else e)
-    df4[["rewritten_s"]] = df4[["simdpath"]]
-    df5 = df.filter(items=query, axis=0)[["jsonski", "simdpath"]] 
-    df4[["jsonski", "simdpath"]] = df5
-    df6 = df.filter(items=query_partial, axis=0)[["simdpath"]].rename(lambda e:"Ts")
+    df4 = df.filter(items=query_rewritten, axis=0)[["rsonpath"]].rename(lambda e:e[:-1] if e[-1] == "r" else e)
+    df4[["rewritten_s"]] = df4[["rsonpath"]]
+    df5 = df.filter(items=query, axis=0)[["jsonski", "rsonpath"]] 
+    df4[["jsonski", "rsonpath"]] = df5
+    df6 = df.filter(items=query_partial, axis=0)[["rsonpath"]].rename(lambda e:"Ts")
     df4[["rewritten_s2"]] = df6
-    df4 = df4[["jsonski", "simdpath", "rewritten_s", "rewritten_s2"]]
+    df4 = df4[["jsonski", "rsonpath", "rewritten_s", "rewritten_s2"]]
     #for i in ("Ts2", "Ts3"):
     #    jsonski = jsonski.drop(i)
     fig = plot_from_dataframe(df4)
-    fig.savefig(outpath+"/query_interest.png", bbox_inches='tight')
+    fig.savefig(outpath+"/other.png", bbox_inches='tight')
