@@ -10,8 +10,6 @@ import pandas as pd
 from extract_info import *
 from draw_plot import print_plot as plot
 
-
-
 if __name__ == "__main__":
     path = None
     if len(sys.argv) > 1:

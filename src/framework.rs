@@ -1,11 +1,13 @@
 use self::implementation::prepare;
 use self::{benchmark_options::BenchmarkOptions, implementation::prepare_with_id};
 use crate::{
-    jsonpath_rust::{JsonpathRust, JsonpathRustError},
-    rsonpath::{Rsonpath, RsonpathError, RsonpathMmap},
-    rust_jsonski::{JsonSki, JsonSkiError},
-    rust_jsurfer::{JSurfer, JSurferError},
-    serde_json_path::{SerdeJsonPath, SerdeJsonPathError},
+    dataset,
+    implementations::{
+        jsonpath_rust::{JsonpathRust, JsonpathRustError},
+        rsonpath::{Rsonpath, RsonpathError, RsonpathMmap},
+        rust_jsurfer::{JSurfer, JSurferError},
+        serde_json_path::{SerdeJsonPath, SerdeJsonPathError},
+    },
 };
 use criterion::{Criterion, Throughput};
 use implementation::{Implementation, PreparedQuery};
@@ -13,14 +15,12 @@ use std::{path::PathBuf, time::Duration};
 use thiserror::Error;
 
 pub mod benchmark_options;
-pub mod dataset;
 pub mod implementation;
 
 #[derive(Clone, Copy, Debug)]
 pub enum BenchTarget<'q> {
     RsonpathMmap(&'q str),
     Rsonpath(&'q str),
-    JsonSki(&'q str),
     JSurfer(&'q str),
     JsonpathRust(&'q str),
     SerdeJsonPath(&'q str),
@@ -69,15 +69,15 @@ impl Benchset {
             Some(Duration::from_secs(10))
         };
 
-        // We're aiming for over 1GB/s. Let's say we want to run the query at least 20 times
-        // to get significant results.
-        const TARGET_NUMBER_OF_QUERIES: u64 = 20;
-        const TARGET_SPEED_IN_BYTES_PER_SEC: u64 = 1_000_000_000;
+        // We're aiming for over 1GB/s, but some queries run at 100MB/s.
+        // Let's say we want to run the query at least 10 times to get significant results.
+        const TARGET_NUMBER_OF_QUERIES: f64 = 10.0;
+        const TARGET_SPEED_IN_BYTES_PER_SEC: f64 = 100_000_000.0;
 
         let measurement_secs =
-            (json_file.size_in_bytes as u64) * TARGET_NUMBER_OF_QUERIES / TARGET_SPEED_IN_BYTES_PER_SEC;
-        let measurement_time = if measurement_secs > 10 {
-            Some(Duration::from_secs(measurement_secs))
+            (json_file.size_in_bytes as f64) * TARGET_NUMBER_OF_QUERIES / TARGET_SPEED_IN_BYTES_PER_SEC;
+        let measurement_time = if measurement_secs > 5.0 {
+            Some(Duration::from_secs_f64(measurement_secs))
         } else {
             None
         };
@@ -119,28 +119,14 @@ impl Benchset {
         Ok(self)
     }
 
-    pub fn add_rsonpath_and_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {
-        self.add_target(BenchTarget::RsonpathMmap(query))?
-            .add_target(BenchTarget::JsonSki(query))
-    }
-
-    pub fn add_all_targets_except_jsonski(self, query: &str) -> Result<Self, BenchmarkError> {
-        self.add_target(BenchTarget::RsonpathMmap(query))?
-            .add_target(BenchTarget::JSurfer(query))?
-            .add_target(BenchTarget::JsonpathRust(query))?
-            .add_target(BenchTarget::SerdeJsonPath(query))
-    }
-
     pub fn add_all_targets_except_jsurfer(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::RsonpathMmap(query))?
-            .add_target(BenchTarget::JsonSki(query))?
             .add_target(BenchTarget::JsonpathRust(query))?
             .add_target(BenchTarget::SerdeJsonPath(query))
     }
 
     pub fn add_all_targets(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::RsonpathMmap(query))?
-            .add_target(BenchTarget::JsonSki(query))?
             .add_target(BenchTarget::JSurfer(query))?
             .add_target(BenchTarget::JsonpathRust(query))?
             .add_target(BenchTarget::SerdeJsonPath(query))
@@ -181,11 +167,6 @@ impl<'a> Target for BenchTarget<'a> {
                 let prepared = prepare(rsonpath, file_path, q, load_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
-            BenchTarget::JsonSki(q) => {
-                let jsonski = JsonSki::new()?;
-                let prepared = prepare(jsonski, file_path, q, load_ahead_of_time)?;
-                Ok(Box::new(prepared))
-            }
             BenchTarget::JSurfer(q) => {
                 let jsurfer = JSurfer::new()?;
                 let prepared = prepare(jsurfer, file_path, q, load_ahead_of_time)?;
@@ -219,11 +200,6 @@ impl<'a> Target for BenchTarget<'a> {
             BenchTarget::RsonpathMmap(q) => {
                 let rsonpath = RsonpathMmap::new()?;
                 let prepared = prepare_with_id(rsonpath, id, file_path, q, load_ahead_of_time)?;
-                Ok(Box::new(prepared))
-            }
-            BenchTarget::JsonSki(q) => {
-                let jsonski = JsonSki::new()?;
-                let prepared = prepare_with_id(jsonski, id, file_path, q, load_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
             BenchTarget::JSurfer(q) => {
@@ -286,12 +262,6 @@ pub enum BenchmarkError {
         #[source]
         #[from]
         RsonpathError,
-    ),
-    #[error("error preparing JsonSki bench: {0}")]
-    JsonSkiError(
-        #[source]
-        #[from]
-        JsonSkiError,
     ),
     #[error("error preparing JSurfer bench: {0}")]
     JSurferError(

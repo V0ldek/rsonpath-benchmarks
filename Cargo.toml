@@ -33,7 +33,7 @@ libc = "0.2.126"
 lazy_static = "1.4.0"
 serde_json = "1.0.95"
 sha2 = "0.10.6"
-ouroboros = "0.17.0"
+ouroboros = "0.18.0"
 reqwest = { version = "0.11.14", features = ["blocking"] }
 rsonpath-lib = { version = "0.8.2", default-features = false }
 serde_json_path = "0.6.0"
@@ -53,7 +53,6 @@ default = ["simd"]
 simd = ["rsonpath-lib/simd"]
 
 [build-dependencies]
-cc = "1.0"
 eyre = "0.6.8"
 
 [profile.dev]
@@ -64,27 +63,7 @@ lto = "thin"
 debug = 1
 
 [[bench]]
-name = "ast"
-harness = false
-
-[[bench]]
-name = "crossref"
-harness = false
-
-[[bench]]
 name = "main"
-harness = false
-
-[[bench]]
-name = "openfood"
-harness = false
-
-[[bench]]
-name = "paper_parity"
-harness = false
-
-[[bench]]
-name = "paper_rewrite"
 harness = false
 
 [[bench]]
@@ -93,8 +72,4 @@ harness = false
 
 [[bench]]
 name = "rust_native"
-harness = false
-
-[[bench]]
-name = "twitter"
 harness = false
