@@ -1,3 +1,4 @@
 /target
 /.vscode/*.log
 /data
+Cargo.lock
