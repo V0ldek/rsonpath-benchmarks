@@ -67,6 +67,10 @@ name = "main"
 harness = false
 
 [[bench]]
+name = "main_micro"
+harness = false
+
+[[bench]]
 name = "rsonpath_query_compilation"
 harness = false
 

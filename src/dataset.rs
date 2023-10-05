@@ -24,6 +24,7 @@ pub struct Dataset {
 
 #[derive(Debug, Clone)]
 pub enum DatasetSource {
+    LocalJson,
     UrlJson(&'static str),
     UrlArchive(DatasetArchive),
     UrlTarArchive(DatasetArchive, &'static str),
@@ -36,10 +37,11 @@ pub struct DatasetArchive {
 }
 
 impl DatasetSource {
-    fn url(&self) -> &'static str {
+    fn url(&self) -> Option<&'static str> {
         match self {
-            Self::UrlJson(url) => url,
-            Self::UrlArchive(archive) | Self::UrlTarArchive(archive, _) => archive.url,
+            Self::LocalJson => None,
+            Self::UrlJson(url) => Some(url),
+            Self::UrlArchive(archive) | Self::UrlTarArchive(archive, _) => Some(archive.url),
         }
     }
 }
@@ -74,7 +76,7 @@ impl Dataset {
 
         if new_json_file.checksum != self.checksum {
             Err(DatasetError::InvalidJsonChecksum(
-                self.source.url(),
+                self.source.url().unwrap_or("None"),
                 self.checksum,
                 new_json_file.checksum,
             ))
@@ -119,6 +121,7 @@ impl Dataset {
 
     fn download_file(&self) -> Result<JsonFile, DatasetError> {
         match self.source {
+            DatasetSource::LocalJson => self.read_local_file(),
             DatasetSource::UrlJson(url) => self.download_json(url),
             DatasetSource::UrlArchive(ref archive) => self.download_archive(archive),
             DatasetSource::UrlTarArchive(ref archive, initial_path) => {
@@ -127,18 +130,33 @@ impl Dataset {
         }
     }
 
+    fn read_local_file(&self) -> Result<JsonFile, DatasetError> {
+        self.create_directories()?;
+        let file = fs::File::open(self.json_path()).map_err(DatasetError::FileSystemError)?;
+
+        let progress = get_progress_bar("Reading", file.metadata().map(|m| m.len()).ok());
+        let (checksum, size_in_bytes) = read_digest_and_write(progress.wrap_read(file), None::<&mut fs::File>)?;
+        progress.finish_and_clear();
+
+        Ok(JsonFile {
+            file_path: self.path.to_string(),
+            checksum,
+            size_in_bytes,
+        })
+    }
+
     fn download_json(&self, url: &'static str) -> Result<JsonFile, DatasetError> {
         self.create_directories()?;
         let mut file = fs::File::create(self.json_path()).map_err(DatasetError::FileSystemError)?;
 
         let response = make_download_request(url)?;
         let progress = get_progress_bar("Downloading", response.content_length());
-        let (md5, size_in_bytes) = read_digest_and_write(progress.wrap_read(response), Some(&mut file))?;
+        let (checksum, size_in_bytes) = read_digest_and_write(progress.wrap_read(response), Some(&mut file))?;
         progress.finish_and_clear();
 
         Ok(JsonFile {
             file_path: self.path.to_string(),
-            checksum: md5,
+            checksum,
             size_in_bytes,
         })
     }
@@ -162,7 +180,7 @@ impl Dataset {
         let archive_file = fs::File::open(&archive_path).map_err(DatasetError::FileSystemError)?;
         let progress = get_progress_bar("Extracting", Some(archive_size as u64));
         let gz = GzDecoder::new(progress.wrap_read(archive_file));
-        let (md5, size_in_bytes) = read_digest_and_write(gz, Some(&mut json_file))?;
+        let (checksum, size_in_bytes) = read_digest_and_write(gz, Some(&mut json_file))?;
         progress.finish_and_clear();
 
         // Ignore errors, worst case scenario the file lingers.
@@ -170,7 +188,7 @@ impl Dataset {
 
         Ok(JsonFile {
             file_path: self.path.to_string(),
-            checksum: md5,
+            checksum,
             size_in_bytes,
         })
     }
@@ -191,14 +209,14 @@ impl Dataset {
         unpack_tar_gz(&archive_path, archive_size, initial_path)?;
 
         let json_file = fs::File::open(self.json_path()).map_err(DatasetError::FileSystemError)?;
-        let (md5, size_in_bytes) = read_digest_and_write::<fs::File, fs::File>(json_file, None)?;
+        let (checksum, size_in_bytes) = read_digest_and_write::<fs::File, fs::File>(json_file, None)?;
 
         // Ignore errors, worst case scenario the file lingers.
         fs::remove_file(archive_path).unwrap_or(());
 
         Ok(JsonFile {
             file_path: self.path.to_string(),
-            checksum: md5,
+            checksum,
             size_in_bytes,
         })
     }
@@ -462,6 +480,33 @@ pub const fn pison_wiki() -> Dataset {
             checksum: hex!("60755f971307f29cebbb7daa8624acec41c257dfef5c1543ca0934f5b07edcf7"),
         }),
         checksum: hex!("1abea7979812edc38651a631b11faf64f1eb5a61e2ee875b4e4d4f7b15a8cea9"),
+    }
+}
+
+pub const fn nativejson_canada() -> Dataset {
+    Dataset {
+        name: "nativejson_canada",
+        path: dataset_path!("nativejson/canada.json"),
+        source: DatasetSource::UrlJson("https://github.com/miloyip/nativejson-benchmark/blob/478d5727c2a4048e835a29c65adecc7d795360d5/data/canada.json"),
+        checksum: hex!("1abea7979812edc38651a631b11faf64f1eb5a61e2ee875b4e4d4f7b15a8cea9")
+    }
+}
+
+pub const fn nativejson_citm() -> Dataset {
+    Dataset {
+        name: "nativejson_citm",
+        path: dataset_path!("nativejson/citm.json"),
+        source: DatasetSource::UrlJson("https://github.com/miloyip/nativejson-benchmark/blob/478d5727c2a4048e835a29c65adecc7d795360d5/data/citm.json"),
+        checksum: hex!("1abea7979812edc38651a631b11faf64f1eb5a61e2ee875b4e4d4f7b15a8cea9")
+    }
+}
+
+pub const fn az_tenants() -> Dataset {
+    Dataset {
+        name: "az_tenants",
+        path: dataset_path!("small/az_tenants.json"),
+        source: DatasetSource::LocalJson,
+        checksum: hex!("f4aa54189ddb9fff22a20bf24cb8bb2656880abdb0a01cf1a48cd3ddd30a87d0")
     }
 }
 

@@ -19,8 +19,12 @@ pub fn descendant_only(c: &mut Criterion) {
     rsonpath_query_compilation(c, "$..claims..references..hash");
 }
 
-pub fn small(c: &mut Criterion) {
+pub fn small1(c: &mut Criterion) {
     rsonpath_query_compilation(c, "$..en.value");
+}
+
+pub fn small2(c: &mut Criterion) {
+    rsonpath_query_compilation(c, "$[*].tenantId");
 }
 
 pub fn child_only(c: &mut Criterion) {
@@ -48,7 +52,8 @@ pub fn wildcard_explosion(c: &mut Criterion) {
 criterion_group!(
     query_benches,
     descendant_only,
-    small,
+    small1,
+    small2,
     child_only,
     paper_query,
     many_components,

@@ -1,4 +1,5 @@
 /target
 /.vscode/*.log
-/data
+/data/*
 Cargo.lock
+!/data/small

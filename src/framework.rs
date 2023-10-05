@@ -38,6 +38,7 @@ pub struct Benchset {
     json_document: dataset::JsonFile,
     implementations: Vec<Box<dyn BenchFn>>,
     measure_file_load: bool,
+    measure_compilation_time: bool,
 }
 
 pub struct ConfiguredBenchset {
@@ -103,6 +104,7 @@ impl Benchset {
             json_document: json_file,
             implementations: vec![],
             measure_file_load: true,
+            measure_compilation_time: false,
         })
     }
 
@@ -113,14 +115,30 @@ impl Benchset {
         }
     }
 
+    pub fn measure_compilation_time(self) -> Self {
+        Self {
+            measure_compilation_time: true,
+            ..self
+        }
+    }
+
     pub fn add_target(mut self, target: BenchTarget<'_>) -> Result<Self, BenchmarkError> {
-        let bench_fn = target.to_bench_fn(&self.json_document.file_path, !self.measure_file_load)?;
+        let bench_fn = target.to_bench_fn(
+            &self.json_document.file_path,
+            !self.measure_file_load,
+            !self.measure_compilation_time,
+        )?;
         self.implementations.push(bench_fn);
         Ok(self)
     }
 
     pub fn add_target_with_id(mut self, target: BenchTarget<'_>, id: &'static str) -> Result<Self, BenchmarkError> {
-        let bench_fn = target.to_bench_fn_with_id(&self.json_document.file_path, !self.measure_file_load, id)?;
+        let bench_fn = target.to_bench_fn_with_id(
+            &self.json_document.file_path,
+            !self.measure_file_load,
+            !self.measure_compilation_time,
+            id,
+        )?;
         self.implementations.push(bench_fn);
         Ok(self)
     }
@@ -155,47 +173,58 @@ impl Benchset {
 }
 
 trait Target {
-    fn to_bench_fn(self, file_path: &str, load_ahead_of_time: bool) -> Result<Box<dyn BenchFn>, BenchmarkError>;
+    fn to_bench_fn(
+        self,
+        file_path: &str,
+        load_ahead_of_time: bool,
+        compile_ahead_of_time: bool,
+    ) -> Result<Box<dyn BenchFn>, BenchmarkError>;
 
     fn to_bench_fn_with_id(
         self,
         file_path: &str,
         load_ahead_of_time: bool,
+        compile_ahead_of_time: bool,
         id: &'static str,
     ) -> Result<Box<dyn BenchFn>, BenchmarkError>;
 }
 
 impl<'a> Target for BenchTarget<'a> {
-    fn to_bench_fn(self, file_path: &str, load_ahead_of_time: bool) -> Result<Box<dyn BenchFn>, BenchmarkError> {
+    fn to_bench_fn(
+        self,
+        file_path: &str,
+        load_ahead_of_time: bool,
+        compile_ahead_of_time: bool,
+    ) -> Result<Box<dyn BenchFn>, BenchmarkError> {
         match self {
             BenchTarget::Rsonpath(q, ResultType::Full) => {
                 let rsonpath = Rsonpath::new()?;
-                let prepared = prepare(rsonpath, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare(rsonpath, file_path, q, load_ahead_of_time, compile_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
             BenchTarget::Rsonpath(q, ResultType::Count) => {
                 let rsonpath = RsonpathCount::new()?;
-                let prepared = prepare(rsonpath, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare(rsonpath, file_path, q, load_ahead_of_time, compile_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
             BenchTarget::RsonpathMmap(q) => {
                 let rsonpath = RsonpathMmap::new()?;
-                let prepared = prepare(rsonpath, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare(rsonpath, file_path, q, load_ahead_of_time, compile_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
             BenchTarget::JSurfer(q) => {
                 let jsurfer = JSurfer::new()?;
-                let prepared = prepare(jsurfer, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare(jsurfer, file_path, q, load_ahead_of_time, compile_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
             BenchTarget::JsonpathRust(q) => {
                 let jsonpath_rust = JsonpathRust::new()?;
-                let prepared = prepare(jsonpath_rust, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare(jsonpath_rust, file_path, q, load_ahead_of_time, compile_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
             BenchTarget::SerdeJsonPath(q) => {
                 let serde_json_path = SerdeJsonPath::new()?;
-                let prepared = prepare(serde_json_path, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare(serde_json_path, file_path, q, load_ahead_of_time, compile_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
         }
@@ -205,37 +234,52 @@ impl<'a> Target for BenchTarget<'a> {
         self,
         file_path: &str,
         load_ahead_of_time: bool,
+        compile_ahead_of_time: bool,
         id: &'static str,
     ) -> Result<Box<dyn BenchFn>, BenchmarkError> {
         match self {
             BenchTarget::Rsonpath(q, ResultType::Full) => {
                 let rsonpath = Rsonpath::new()?;
-                let prepared = prepare_with_id(rsonpath, id, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare_with_id(rsonpath, id, file_path, q, load_ahead_of_time, compile_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
             BenchTarget::Rsonpath(q, ResultType::Count) => {
                 let rsonpath = RsonpathCount::new()?;
-                let prepared = prepare_with_id(rsonpath, id, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare_with_id(rsonpath, id, file_path, q, load_ahead_of_time, compile_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
             BenchTarget::RsonpathMmap(q) => {
                 let rsonpath = RsonpathMmap::new()?;
-                let prepared = prepare_with_id(rsonpath, id, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare_with_id(rsonpath, id, file_path, q, load_ahead_of_time, compile_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
             BenchTarget::JSurfer(q) => {
                 let jsurfer = JSurfer::new()?;
-                let prepared = prepare_with_id(jsurfer, id, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare_with_id(jsurfer, id, file_path, q, load_ahead_of_time, compile_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
             BenchTarget::JsonpathRust(q) => {
                 let jsonpath_rust = JsonpathRust::new()?;
-                let prepared = prepare_with_id(jsonpath_rust, id, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare_with_id(
+                    jsonpath_rust,
+                    id,
+                    file_path,
+                    q,
+                    load_ahead_of_time,
+                    compile_ahead_of_time,
+                )?;
                 Ok(Box::new(prepared))
             }
             BenchTarget::SerdeJsonPath(q) => {
                 let serde_json_path = SerdeJsonPath::new()?;
-                let prepared = prepare_with_id(serde_json_path, id, file_path, q, load_ahead_of_time)?;
+                let prepared = prepare_with_id(
+                    serde_json_path,
+                    id,
+                    file_path,
+                    q,
+                    load_ahead_of_time,
+                    compile_ahead_of_time,
+                )?;
                 Ok(Box::new(prepared))
             }
         }
@@ -254,17 +298,26 @@ impl<I: Implementation> BenchFn for PreparedQuery<I> {
     }
 
     fn run(&self) {
-        match &self.file {
+        let f_storage;
+        let q_storage;
+
+        let f = match &self.file {
             implementation::File::NeedToLoad(file_path) => {
-                let f = self.implementation.load_file(file_path).unwrap();
-                let result = self.implementation.run(&self.query, &f).unwrap();
-                criterion::black_box(result);
+                f_storage = self.implementation.load_file(file_path).unwrap();
+                &f_storage
             }
-            implementation::File::AlreadyLoaded(f) => {
-                let result = self.implementation.run(&self.query, f).unwrap();
-                criterion::black_box(result);
-            }
+            implementation::File::AlreadyLoaded(f) => f,
         };
+        let q = match &self.query {
+            implementation::Query::NeedToCompile(query_string) => {
+                q_storage = self.implementation.compile_query(query_string).unwrap();
+                &q_storage
+            }
+            implementation::Query::AlreadyCompiled(q) => q,
+        };
+
+        let result = self.implementation.run(q, f).unwrap();
+        criterion::black_box(result);
     }
 }
 
