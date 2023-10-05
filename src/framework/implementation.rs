@@ -20,13 +20,18 @@ pub trait Implementation: Sized {
 pub struct PreparedQuery<I: Implementation> {
     pub(crate) implementation: I,
     pub(crate) id: &'static str,
-    pub(crate) query: I::Query,
+    pub(crate) query: Query<I::Query>,
     pub(crate) file: File<I::File>,
 }
 
 pub(crate) enum File<F> {
     NeedToLoad(String),
     AlreadyLoaded(F),
+}
+
+pub(crate) enum Query<Q> {
+    NeedToCompile(String),
+    AlreadyCompiled(Q),
 }
 
 impl<F> File<F> {
@@ -39,13 +44,31 @@ impl<F> File<F> {
     }
 }
 
+impl<Q> Query<Q> {
+    fn from_str(query: &str) -> Query<Q> {
+        Query::NeedToCompile(query.to_string())
+    }
+
+    fn from_query(query: Q) -> Query<Q> {
+        Query::AlreadyCompiled(query)
+    }
+}
+
 pub(crate) fn prepare<I: Implementation>(
     implementation: I,
     file_path: &str,
     query: &str,
     load_ahead_of_time: bool,
+    compile_ahead_of_time: bool,
 ) -> Result<PreparedQuery<I>, I::Error> {
-    prepare_with_id(implementation, I::id(), file_path, query, load_ahead_of_time)
+    prepare_with_id(
+        implementation,
+        I::id(),
+        file_path,
+        query,
+        load_ahead_of_time,
+        compile_ahead_of_time,
+    )
 }
 
 pub(crate) fn prepare_with_id<I: Implementation>(
@@ -54,8 +77,13 @@ pub(crate) fn prepare_with_id<I: Implementation>(
     file_path: &str,
     query: &str,
     load_ahead_of_time: bool,
+    compile_ahead_of_time: bool,
 ) -> Result<PreparedQuery<I>, I::Error> {
-    let query = implementation.compile_query(query)?;
+    let query = if compile_ahead_of_time {
+        Query::from_query(implementation.compile_query(query)?)
+    } else {
+        Query::from_str(query)
+    };
 
     let file = if load_ahead_of_time {
         File::from_file(implementation.load_file(file_path)?)
