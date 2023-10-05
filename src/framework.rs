@@ -88,7 +88,7 @@ impl Benchset {
         } else {
             None
         };
-        let sample_count = if json_file.size_in_bytes < 100_000_000 {
+        let sample_count = if json_file.size_in_bytes < 1_000_000 {
             None
         } else {
             Some(10)
