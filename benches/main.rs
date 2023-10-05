@@ -1,5 +1,41 @@
 use rsonpath_benchmarks::prelude::*;
 
+pub fn canada_second_coord_component(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset: rsonpath_benchmarks::framework::ConfiguredBenchset =
+        Benchset::new("canada::second_coord_component", dataset::nativejson_canada())?
+            .do_not_measure_file_load_time()
+            .add_rsonpath_with_all_result_types("$.features[*].geometry.coordinates[*][*][1]")?
+            .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+pub fn canada_coord_476_1446_1(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset: rsonpath_benchmarks::framework::ConfiguredBenchset =
+        Benchset::new("canada::coord_476_1446_1", dataset::nativejson_canada())?
+            .do_not_measure_file_load_time()
+            .add_rsonpath_with_all_result_types("$..coordinates[476][1446][1]")?
+            .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+pub fn citm_seat_category(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset: rsonpath_benchmarks::framework::ConfiguredBenchset =
+        Benchset::new("citm::seatCategoryId", dataset::nativejson_citm())?
+            .do_not_measure_file_load_time()
+            .add_rsonpath_with_all_result_types("$..seatCategoryId")?
+            .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
 pub fn ast_nested_inner(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("ast::nested_inner", dataset::ast())?
         .do_not_measure_file_load_time()
@@ -143,7 +179,7 @@ pub fn twitter_metadata(c: &mut Criterion) -> Result<(), BenchmarkError> {
         .add_target_with_id(
             BenchTarget::Rsonpath("$..count", ResultType::Count),
             "rsonpath_descendant_count",
-        )?        
+        )?
         .add_target_with_id(
             BenchTarget::Rsonpath("$.search_metadata.count", ResultType::Full),
             "rsonpath_direct_nodes",
@@ -194,6 +230,9 @@ pub fn all_first_index(c: &mut Criterion) -> Result<(), BenchmarkError> {
 
 benchsets!(
     main_benches,
+    canada_second_coord_component,
+    canada_coord_476_1446_1,
+    citm_seat_category,
     ast_nested_inner,
     ast_deepest,
     bestbuy_products_category,

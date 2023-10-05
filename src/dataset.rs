@@ -487,8 +487,8 @@ pub const fn nativejson_canada() -> Dataset {
     Dataset {
         name: "nativejson_canada",
         path: dataset_path!("nativejson/canada.json"),
-        source: DatasetSource::UrlJson("https://github.com/miloyip/nativejson-benchmark/blob/478d5727c2a4048e835a29c65adecc7d795360d5/data/canada.json"),
-        checksum: hex!("1abea7979812edc38651a631b11faf64f1eb5a61e2ee875b4e4d4f7b15a8cea9")
+        source: DatasetSource::UrlJson("https://raw.githubusercontent.com/miloyip/nativejson-benchmark/478d5727c2a4048e835a29c65adecc7d795360d5/data/canada.json"),
+        checksum: hex!("f83b3b354030d5dd58740c68ac4fecef64cb730a0d12a90362a7f23077f50d78")
     }
 }
 
@@ -496,8 +496,8 @@ pub const fn nativejson_citm() -> Dataset {
     Dataset {
         name: "nativejson_citm",
         path: dataset_path!("nativejson/citm.json"),
-        source: DatasetSource::UrlJson("https://github.com/miloyip/nativejson-benchmark/blob/478d5727c2a4048e835a29c65adecc7d795360d5/data/citm.json"),
-        checksum: hex!("1abea7979812edc38651a631b11faf64f1eb5a61e2ee875b4e4d4f7b15a8cea9")
+        source: DatasetSource::UrlJson("https://raw.githubusercontent.com/miloyip/nativejson-benchmark/478d5727c2a4048e835a29c65adecc7d795360d5/data/citm_catalog.json"),
+        checksum: hex!("a73e7a883f6ea8de113dff59702975e60119b4b58d451d518a929f31c92e2059")
     }
 }
 
