@@ -4,7 +4,7 @@ use crate::{
     dataset,
     implementations::{
         jsonpath_rust::{JsonpathRust, JsonpathRustError},
-        rsonpath::{Rsonpath, RsonpathError, RsonpathMmap},
+        rsonpath::{Rsonpath, RsonpathCount, RsonpathError, RsonpathMmap},
         rust_jsurfer::{JSurfer, JSurferError},
         serde_json_path::{SerdeJsonPath, SerdeJsonPathError},
     },
@@ -20,10 +20,16 @@ pub mod implementation;
 #[derive(Clone, Copy, Debug)]
 pub enum BenchTarget<'q> {
     RsonpathMmap(&'q str),
-    Rsonpath(&'q str),
+    Rsonpath(&'q str, ResultType),
     JSurfer(&'q str),
     JsonpathRust(&'q str),
     SerdeJsonPath(&'q str),
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum ResultType {
+    Full,
+    Count,
 }
 
 pub struct Benchset {
@@ -119,6 +125,11 @@ impl Benchset {
         Ok(self)
     }
 
+    pub fn add_rsonpath_with_all_result_types(self, query: &str) -> Result<Self, BenchmarkError> {
+        self.add_target(BenchTarget::Rsonpath(query, ResultType::Full))?
+            .add_target(BenchTarget::Rsonpath(query, ResultType::Count))
+    }
+
     pub fn add_all_targets_except_jsurfer(self, query: &str) -> Result<Self, BenchmarkError> {
         self.add_target(BenchTarget::RsonpathMmap(query))?
             .add_target(BenchTarget::JsonpathRust(query))?
@@ -157,8 +168,13 @@ trait Target {
 impl<'a> Target for BenchTarget<'a> {
     fn to_bench_fn(self, file_path: &str, load_ahead_of_time: bool) -> Result<Box<dyn BenchFn>, BenchmarkError> {
         match self {
-            BenchTarget::Rsonpath(q) => {
+            BenchTarget::Rsonpath(q, ResultType::Full) => {
                 let rsonpath = Rsonpath::new()?;
+                let prepared = prepare(rsonpath, file_path, q, load_ahead_of_time)?;
+                Ok(Box::new(prepared))
+            }
+            BenchTarget::Rsonpath(q, ResultType::Count) => {
+                let rsonpath = RsonpathCount::new()?;
                 let prepared = prepare(rsonpath, file_path, q, load_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
@@ -192,8 +208,13 @@ impl<'a> Target for BenchTarget<'a> {
         id: &'static str,
     ) -> Result<Box<dyn BenchFn>, BenchmarkError> {
         match self {
-            BenchTarget::Rsonpath(q) => {
+            BenchTarget::Rsonpath(q, ResultType::Full) => {
                 let rsonpath = Rsonpath::new()?;
+                let prepared = prepare_with_id(rsonpath, id, file_path, q, load_ahead_of_time)?;
+                Ok(Box::new(prepared))
+            }
+            BenchTarget::Rsonpath(q, ResultType::Count) => {
+                let rsonpath = RsonpathCount::new()?;
                 let prepared = prepare_with_id(rsonpath, id, file_path, q, load_ahead_of_time)?;
                 Ok(Box::new(prepared))
             }
