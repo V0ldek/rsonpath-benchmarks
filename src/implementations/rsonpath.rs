@@ -6,7 +6,7 @@ use rsonpath::{
 };
 use rsonpath::{
     engine::{Compiler, Engine},
-    input::{MmapInput, OwnedBytes},
+    input::{BorrowedBytes, MmapInput},
     query::JsonPathQuery,
 };
 use std::{convert::Infallible, fmt::Display, fs, io};
@@ -27,7 +27,7 @@ pub struct RsonpathQuery {
 impl Implementation for Rsonpath {
     type Query = RsonpathQuery;
 
-    type File = OwnedBytes;
+    type File = BorrowedBytes<String>;
 
     type Error = RsonpathError;
 
@@ -43,7 +43,7 @@ impl Implementation for Rsonpath {
 
     fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error> {
         let file = fs::read_to_string(file_path)?;
-        let input = OwnedBytes::new(&file.as_bytes())?;
+        let input = BorrowedBytes::new(file);
 
         Ok(input)
     }
@@ -70,7 +70,7 @@ impl Implementation for Rsonpath {
 impl Implementation for RsonpathCount {
     type Query = RsonpathQuery;
 
-    type File = OwnedBytes;
+    type File = BorrowedBytes<String>;
 
     type Error = RsonpathError;
 
@@ -86,7 +86,7 @@ impl Implementation for RsonpathCount {
 
     fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error> {
         let file = fs::read_to_string(file_path)?;
-        let input = OwnedBytes::new(&file.as_bytes())?;
+        let input = BorrowedBytes::new(file);
 
         Ok(input)
     }
