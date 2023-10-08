@@ -24,10 +24,18 @@ pub struct RsonpathQuery {
     engine: MainEngine<'this>,
 }
 
+#[self_referencing()]
+pub struct RsonpathInput {
+    contents: String,
+    #[borrows(contents)]
+    #[not_covariant]
+    input: BorrowedBytes<'this>,
+}
+
 impl Implementation for Rsonpath {
     type Query = RsonpathQuery;
 
-    type File = BorrowedBytes<String>;
+    type File = RsonpathInput;
 
     type Error = RsonpathError;
 
@@ -43,7 +51,7 @@ impl Implementation for Rsonpath {
 
     fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error> {
         let file = fs::read_to_string(file_path)?;
-        let input = BorrowedBytes::new(file);
+        let input = RsonpathInput::new(file, |contents| BorrowedBytes::new(contents.as_bytes()));
 
         Ok(input)
     }
@@ -60,7 +68,7 @@ impl Implementation for Rsonpath {
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
         query
-            .with_engine(|engine| engine.matches(file, &mut VoidSink))
+            .with_engine(|engine| file.with_input(|input| engine.matches(input, &mut VoidSink)))
             .map_err(RsonpathError::EngineError)?;
 
         Ok("[not collected]")
@@ -70,7 +78,7 @@ impl Implementation for Rsonpath {
 impl Implementation for RsonpathCount {
     type Query = RsonpathQuery;
 
-    type File = BorrowedBytes<String>;
+    type File = RsonpathInput;
 
     type Error = RsonpathError;
 
@@ -86,7 +94,7 @@ impl Implementation for RsonpathCount {
 
     fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error> {
         let file = fs::read_to_string(file_path)?;
-        let input = BorrowedBytes::new(file);
+        let input = RsonpathInput::new(file, |contents| BorrowedBytes::new(contents.as_bytes()));
 
         Ok(input)
     }
@@ -103,7 +111,7 @@ impl Implementation for RsonpathCount {
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
         query
-            .with_engine(|engine| engine.count(file))
+            .with_engine(|engine| file.with_input(|input| engine.count(input)))
             .map_err(RsonpathError::EngineError)?;
 
         Ok("[not collected]")
