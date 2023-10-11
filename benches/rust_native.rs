@@ -1,7 +1,8 @@
 use rsonpath_benchmarks::prelude::*;
 
 pub fn ast_decl_inner(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("ast::decl_inner", dataset::ast())?
+    let benchset = Benchset::new("rust_native::ast::decl_inner", dataset::ast())?
+        .measure_compilation_time()
         .add_rust_native_targets("$..decl.name")?
         .finish();
 
@@ -10,71 +11,9 @@ pub fn ast_decl_inner(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
-pub fn bestbuy_products_video_only(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("bestbuy::products_video_only", dataset::pison_bestbuy_short())?
-        .add_target_with_id(
-            BenchTarget::RsonpathMmap("$.products[*].videoChapters"),
-            "rsonpath_direct",
-        )?
-        .add_target_with_id(BenchTarget::RsonpathMmap("$..videoChapters"), "rsonpath_descendant")?
-        .add_target_with_id(
-            BenchTarget::JsonpathRust("$.products[*].videoChapters"),
-            "jsonpath-rust_direct",
-        )?
-        .add_target_with_id(
-            BenchTarget::JsonpathRust("$..videoChapters"),
-            "jsonpath-rust_descendant",
-        )?
-        .add_target_with_id(
-            BenchTarget::SerdeJsonPath("$.products[*].videoChapters"),
-            "serde_json_path_direct",
-        )?
-        .add_target_with_id(
-            BenchTarget::SerdeJsonPath("$..videoChapters"),
-            "serde_json_path_descendant",
-        )?
-        .finish();
-
-    benchset.run(c);
-
-    Ok(())
-}
-
-pub fn google_map_travel_modes(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("google_map::travel_modes", dataset::pison_google_map_short())?
-        .add_target_with_id(
-            BenchTarget::RsonpathMmap("$[*].available_travel_modes"),
-            "rsonpath_direct",
-        )?
-        .add_target_with_id(
-            BenchTarget::RsonpathMmap("$..available_travel_modes"),
-            "rsonpath_descendant",
-        )?
-        .add_target_with_id(
-            BenchTarget::JsonpathRust("$[*].available_travel_modes"),
-            "jsonpath-rust_direct",
-        )?
-        .add_target_with_id(
-            BenchTarget::JsonpathRust("$..available_travel_modes"),
-            "jsonpath-rust_descendant",
-        )?
-        .add_target_with_id(
-            BenchTarget::SerdeJsonPath("$[*].available_travel_modes"),
-            "serde_json_path_direct",
-        )?
-        .add_target_with_id(
-            BenchTarget::SerdeJsonPath("$..available_travel_modes"),
-            "serde_json_path_descendant",
-        )?
-        .finish();
-
-    benchset.run(c);
-
-    Ok(())
-}
-
 pub fn twitter_metadata(c: &mut Criterion) -> Result<(), BenchmarkError> {
-    let benchset = Benchset::new("twitter::metadata", dataset::twitter())?
+    let benchset = Benchset::new("rust_native::twitter::metadata", dataset::twitter())?
+        .measure_compilation_time()
         .add_target_with_id(BenchTarget::RsonpathMmap("$.search_metadata.count"), "rsonpath_direct")?
         .add_target_with_id(BenchTarget::RsonpathMmap("$..count"), "rsonpath_descendant")?
         .add_target_with_id(
@@ -94,10 +33,37 @@ pub fn twitter_metadata(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
-benchsets!(
-    main_benches,
-    ast_decl_inner,
-    bestbuy_products_video_only,
-    google_map_travel_modes,
-    twitter_metadata
-);
+fn az_tenant_last(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("rust_native::az_tenants::tenant_last", dataset::az_tenants())?
+        .measure_compilation_time()
+        .add_rust_native_targets("$[83]")?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+fn az_tenant_ids(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("rust_native::az_tenant::tenant_ids", dataset::az_tenants())?
+        .measure_compilation_time()
+        .add_target_with_id(BenchTarget::RsonpathMmap("$[*].tenantId"), "rsonpath_direct")?
+        .add_target_with_id(BenchTarget::RsonpathMmap("$..tenantId"), "rsonpath_descendant")?
+        .add_target_with_id(
+            BenchTarget::JsonpathRust("$[*].tenantId"),
+            "jsonpath-rust_direct",
+        )?
+        .add_target_with_id(BenchTarget::JsonpathRust("$..tenantId"), "jsonpath-rust_descendant")?
+        .add_target_with_id(
+            BenchTarget::SerdeJsonPath("$[*].tenantId"),
+            "serde_json_path_direct",
+        )?
+        .add_target_with_id(BenchTarget::SerdeJsonPath("$..tenantId"), "serde_json_path_descendant")?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+benchsets!(main_benches, ast_decl_inner, az_tenant_last, az_tenant_ids, twitter_metadata);
