@@ -15,6 +15,7 @@ use thiserror::Error;
 pub struct Rsonpath {}
 pub struct RsonpathCount {}
 pub struct RsonpathMmap {}
+pub struct RsonpathMmapCount {}
 
 #[self_referencing()]
 pub struct RsonpathQuery {
@@ -155,6 +156,49 @@ impl Implementation for RsonpathMmap {
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
         query
             .with_engine(|engine| engine.matches(file, &mut VoidSink))
+            .map_err(RsonpathError::EngineError)?;
+
+        Ok("[not collected]")
+    }
+}
+
+impl Implementation for RsonpathMmapCount {
+    type Query = RsonpathQuery;
+
+    type File = MmapInput;
+
+    type Error = RsonpathError;
+
+    type Result<'a> = &'static str;
+
+    fn id() -> &'static str {
+        "rsonpath_mmap_count"
+    }
+
+    fn new() -> Result<Self, Self::Error> {
+        Ok(RsonpathMmapCount {})
+    }
+
+    fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error> {
+        let file = fs::File::open(file_path)?;
+        let input = unsafe { MmapInput::map_file(&file)? };
+
+        Ok(input)
+    }
+
+    fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
+        let query = JsonPathQuery::parse(query).unwrap();
+
+        let rsonpath = RsonpathQuery::try_new(query, |query| {
+            MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
+        })?;
+
+        Ok(rsonpath)
+    }
+
+    fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
+        query
+            .with_engine(|engine| engine.count(file))
             .map_err(RsonpathError::EngineError)?;
 
         Ok("[not collected]")

@@ -19,7 +19,8 @@ fn setup_jsurfer() -> Result<()> {
     }
 
     let java_home = std::env::var("JAVA_HOME").wrap_err("JAVA_HOME env variable not set")?;
-    let jar_absolute_path = std::path::Path::new("./src/implementations/jsurferShim/lib/jsurferShim.jar").canonicalize()?;
+    let jar_absolute_path =
+        std::path::Path::new("./src/implementations/jsurferShim/lib/jsurferShim.jar").canonicalize()?;
 
     println!("cargo:rerun-if-changed=src/implementations/jsurferShim");
     println!("cargo:rustc-env=LD_LIBRARY_PATH={java_home}/lib/server");
