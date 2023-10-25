@@ -14,8 +14,14 @@ pub fn ast_decl_inner(c: &mut Criterion) -> Result<(), BenchmarkError> {
 pub fn twitter_metadata(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("rust_native::twitter::metadata", dataset::twitter())?
         .measure_compilation_time()
-        .add_target_with_id(BenchTarget::RsonpathMmap("$.search_metadata.count"), "rsonpath_direct")?
-        .add_target_with_id(BenchTarget::RsonpathMmap("$..count"), "rsonpath_descendant")?
+        .add_target_with_id(
+            BenchTarget::RsonpathMmap("$.search_metadata.count", ResultType::Full),
+            "rsonpath_direct",
+        )?
+        .add_target_with_id(
+            BenchTarget::RsonpathMmap("$..count", ResultType::Full),
+            "rsonpath_descendant",
+        )?
         .add_target_with_id(
             BenchTarget::JsonpathRust("$.search_metadata.count"),
             "jsonpath-rust_direct",
@@ -47,17 +53,17 @@ fn az_tenant_last(c: &mut Criterion) -> Result<(), BenchmarkError> {
 fn az_tenant_ids(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("rust_native::az_tenant::tenant_ids", dataset::az_tenants())?
         .measure_compilation_time()
-        .add_target_with_id(BenchTarget::RsonpathMmap("$[*].tenantId"), "rsonpath_direct")?
-        .add_target_with_id(BenchTarget::RsonpathMmap("$..tenantId"), "rsonpath_descendant")?
         .add_target_with_id(
-            BenchTarget::JsonpathRust("$[*].tenantId"),
-            "jsonpath-rust_direct",
+            BenchTarget::RsonpathMmap("$[*].tenantId", ResultType::Full),
+            "rsonpath_direct",
         )?
+        .add_target_with_id(
+            BenchTarget::RsonpathMmap("$..tenantId", ResultType::Full),
+            "rsonpath_descendant",
+        )?
+        .add_target_with_id(BenchTarget::JsonpathRust("$[*].tenantId"), "jsonpath-rust_direct")?
         .add_target_with_id(BenchTarget::JsonpathRust("$..tenantId"), "jsonpath-rust_descendant")?
-        .add_target_with_id(
-            BenchTarget::SerdeJsonPath("$[*].tenantId"),
-            "serde_json_path_direct",
-        )?
+        .add_target_with_id(BenchTarget::SerdeJsonPath("$[*].tenantId"), "serde_json_path_direct")?
         .add_target_with_id(BenchTarget::SerdeJsonPath("$..tenantId"), "serde_json_path_descendant")?
         .finish();
 
@@ -66,4 +72,10 @@ fn az_tenant_ids(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
-benchsets!(main_benches, ast_decl_inner, az_tenant_last, az_tenant_ids, twitter_metadata);
+benchsets!(
+    main_benches,
+    ast_decl_inner,
+    az_tenant_last,
+    az_tenant_ids,
+    twitter_metadata
+);

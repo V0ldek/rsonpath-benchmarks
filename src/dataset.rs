@@ -506,7 +506,7 @@ pub const fn az_tenants() -> Dataset {
         name: "az_tenants",
         path: dataset_path!("small/az_tenants.json"),
         source: DatasetSource::LocalJson,
-        checksum: hex!("f4aa54189ddb9fff22a20bf24cb8bb2656880abdb0a01cf1a48cd3ddd30a87d0")
+        checksum: hex!("f4aa54189ddb9fff22a20bf24cb8bb2656880abdb0a01cf1a48cd3ddd30a87d0"),
     }
 }
 
