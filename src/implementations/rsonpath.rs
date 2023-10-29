@@ -2,11 +2,12 @@ use crate::framework::implementation::Implementation;
 use ouroboros::self_referencing;
 use rsonpath::{
     engine::main::MainEngine,
+    input::OwnedBytes,
     result::{Match, Sink},
 };
 use rsonpath::{
     engine::{Compiler, Engine},
-    input::{BorrowedBytes, MmapInput},
+    input::MmapInput,
     query::JsonPathQuery,
 };
 use std::{convert::Infallible, fmt::Display, fs, io};
@@ -25,18 +26,10 @@ pub struct RsonpathQuery {
     engine: MainEngine<'this>,
 }
 
-#[self_referencing()]
-pub struct RsonpathInput {
-    contents: String,
-    #[borrows(contents)]
-    #[not_covariant]
-    input: BorrowedBytes<'this>,
-}
-
 impl Implementation for Rsonpath {
     type Query = RsonpathQuery;
 
-    type File = RsonpathInput;
+    type File = OwnedBytes<Vec<u8>>;
 
     type Error = RsonpathError;
 
@@ -52,7 +45,7 @@ impl Implementation for Rsonpath {
 
     fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error> {
         let file = fs::read_to_string(file_path)?;
-        let input = RsonpathInput::new(file, |contents| BorrowedBytes::new(contents.as_bytes()));
+        let input = OwnedBytes::new(file.into_bytes());
 
         Ok(input)
     }
@@ -69,7 +62,7 @@ impl Implementation for Rsonpath {
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
         query
-            .with_engine(|engine| file.with_input(|input| engine.matches(input, &mut VoidSink)))
+            .with_engine(|engine| engine.count(file))
             .map_err(RsonpathError::EngineError)?;
 
         Ok("[not collected]")
@@ -79,7 +72,7 @@ impl Implementation for Rsonpath {
 impl Implementation for RsonpathCount {
     type Query = RsonpathQuery;
 
-    type File = RsonpathInput;
+    type File = OwnedBytes<Vec<u8>>;
 
     type Error = RsonpathError;
 
@@ -95,7 +88,7 @@ impl Implementation for RsonpathCount {
 
     fn load_file(&self, file_path: &str) -> Result<Self::File, Self::Error> {
         let file = fs::read_to_string(file_path)?;
-        let input = RsonpathInput::new(file, |contents| BorrowedBytes::new(contents.as_bytes()));
+        let input = OwnedBytes::new(file.into_bytes());
 
         Ok(input)
     }
@@ -112,7 +105,7 @@ impl Implementation for RsonpathCount {
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
         query
-            .with_engine(|engine| file.with_input(|input| engine.count(input)))
+            .with_engine(|engine| engine.matches(file, &mut VoidSink))
             .map_err(RsonpathError::EngineError)?;
 
         Ok("[not collected]")
