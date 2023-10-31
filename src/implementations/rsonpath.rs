@@ -8,8 +8,8 @@ use rsonpath::{
 use rsonpath::{
     engine::{Compiler, Engine},
     input::MmapInput,
-    query::JsonPathQuery,
 };
+use rsonpath_syntax::JsonPathQuery;
 use std::{convert::Infallible, fmt::Display, fs, io};
 use thiserror::Error;
 
