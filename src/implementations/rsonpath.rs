@@ -201,7 +201,7 @@ impl Implementation for RsonpathMmapCount {
 #[derive(Error, Debug)]
 pub enum RsonpathError {
     #[error(transparent)]
-    CompilerError(#[from] rsonpath::query::error::CompilerError),
+    CompilerError(#[from] rsonpath::automaton::error::CompilerError),
     #[error(transparent)]
     EngineError(#[from] rsonpath::engine::error::EngineError),
     #[error(transparent)]
