@@ -1,13 +1,12 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use rsonpath::engine::{Compiler, RsonpathEngine};
-use rsonpath_syntax::JsonPathQuery;
 
 fn rsonpath_query_compilation(c: &mut Criterion, query_string: &str) {
     let mut group = c.benchmark_group(format! {"rsonpath_{query_string}"});
 
     group.bench_with_input(BenchmarkId::new("compile_query", query_string), query_string, |b, q| {
         b.iter(|| {
-            let query = JsonPathQuery::parse(q).unwrap();
+            let query = rsonpath_syntax::parse(q).unwrap();
             black_box(RsonpathEngine::compile_query(&query).unwrap());
         })
     });
