@@ -51,7 +51,7 @@ impl Implementation for Rsonpath {
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
-        let query = JsonPathQuery::parse(query).unwrap();
+        let query = rsonpath_syntax::parse(query).unwrap();
 
         let rsonpath = RsonpathQuery::try_new(query, |query| {
             MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
@@ -94,7 +94,7 @@ impl Implementation for RsonpathCount {
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
-        let query = JsonPathQuery::parse(query).unwrap();
+        let query = rsonpath_syntax::parse(query).unwrap();
 
         let rsonpath = RsonpathQuery::try_new(query, |query| {
             MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
@@ -137,7 +137,7 @@ impl Implementation for RsonpathMmap {
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
-        let query = JsonPathQuery::parse(query).unwrap();
+        let query = rsonpath_syntax::parse(query).unwrap();
 
         let rsonpath = RsonpathQuery::try_new(query, |query| {
             MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
@@ -180,7 +180,7 @@ impl Implementation for RsonpathMmapCount {
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
-        let query = JsonPathQuery::parse(query).unwrap();
+        let query = rsonpath_syntax::parse(query).unwrap();
 
         let rsonpath = RsonpathQuery::try_new(query, |query| {
             MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
