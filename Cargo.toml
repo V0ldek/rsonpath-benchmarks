@@ -28,7 +28,7 @@ flate2 = "1.0.28"
 hex-literal = "0.4.1"
 indicatif = "0.17.7"
 jni = { version = "0.21.1", features = ["invocation", "default"] }
-jsonpath-rust = "0.3.4"
+jsonpath-rust = "0.5.0"
 libc = "0.2.149"
 lazy_static = "1.4.0"
 serde_json = "1.0.108"

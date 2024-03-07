@@ -1,5 +1,5 @@
 use crate::framework::implementation::Implementation;
-use jsonpath_rust::{parser::model::JsonPath, JsonPathInst, JsonPtr};
+use jsonpath_rust::{parser::model::JsonPath, path::config::JsonPathConfig, JsonPathInst, JsonPtr};
 use serde_json::Value;
 use std::{
     fmt::Display,
@@ -16,7 +16,7 @@ pub struct JsonpathRustResult<'a>(Vec<JsonPtr<'a, Value>>);
 impl Implementation for JsonpathRust {
     type Query = JsonPathInst;
 
-    type File = Value;
+    type File = (Value, JsonPathConfig);
 
     type Error = JsonpathRustError;
 
@@ -34,8 +34,9 @@ impl Implementation for JsonpathRust {
         let file = fs::File::open(file_path)?;
         let reader = BufReader::new(file);
         let value: Value = serde_json::from_reader(reader)?;
+        let config = JsonPathConfig::default();
 
-        Ok(value)
+        Ok((value, config))
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
@@ -43,7 +44,7 @@ impl Implementation for JsonpathRust {
     }
 
     fn run<'a>(&self, query: &'a Self::Query, file: &'a Self::File) -> Result<Self::Result<'a>, Self::Error> {
-        let results = query.find_slice(file);
+        let results = query.find_slice(&file.0, file.1.clone());
 
         Ok(JsonpathRustResult(results))
     }
