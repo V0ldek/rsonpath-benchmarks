@@ -24,6 +24,30 @@ pub fn canada_coord_476_1446_1(c: &mut Criterion) -> Result<(), BenchmarkError> 
     Ok(())
 }
 
+pub fn canada_coord_slice_100_to_200(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset: rsonpath_benchmarks::framework::ConfiguredBenchset =
+        Benchset::new("canada::coord_slice_100_to_200", dataset::nativejson_canada())?
+            .do_not_measure_file_load_time()
+            .add_rsonpath_with_all_result_types("$..coordinates[100:201][*][*]")?
+            .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+pub fn canada_coord_slice_overlapping(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset: rsonpath_benchmarks::framework::ConfiguredBenchset =
+        Benchset::new("canada::coord_slice_overlapping", dataset::nativejson_canada())?
+            .do_not_measure_file_load_time()
+            .add_rsonpath_with_all_result_types("$..coordinates[5::7][3::10][*]")?
+            .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
 pub fn citm_seat_category(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset: rsonpath_benchmarks::framework::ConfiguredBenchset =
         Benchset::new("citm::seatCategoryId", dataset::nativejson_citm())?
@@ -58,10 +82,10 @@ pub fn ast_deepest(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
-pub fn bestbuy_products_category(c: &mut Criterion) -> Result<(), BenchmarkError> {
+pub fn bestbuy_products_category_slice(c: &mut Criterion) -> Result<(), BenchmarkError> {
     let benchset = Benchset::new("bestbuy::products_category", dataset::pison_bestbuy_short())?
         .do_not_measure_file_load_time()
-        .add_rsonpath_with_all_result_types("$.products[*].categoryPath[*].id")?
+        .add_rsonpath_with_all_result_types("$.products[*].categoryPath[1:3].id")?
         .finish();
 
     benchset.run(c);
@@ -232,10 +256,12 @@ benchsets!(
     main_benches,
     canada_second_coord_component,
     canada_coord_476_1446_1,
+    canada_coord_slice_100_to_200,
+    canada_second_coord_component,
     citm_seat_category,
     ast_nested_inner,
     ast_deepest,
-    bestbuy_products_category,
+    bestbuy_products_category_slice,
     bestbuy_products_video_only,
     bestbuy_all_nodes,
     google_map_routes,

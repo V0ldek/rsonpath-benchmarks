@@ -72,10 +72,34 @@ fn az_tenant_ids(c: &mut Criterion) -> Result<(), BenchmarkError> {
     Ok(())
 }
 
+fn az_every_other_tenant(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("rust_native::az_tenant:every_other_tenant", dataset::az_tenants())?
+        .measure_compilation_time()
+        .add_rust_native_targets("$[::2]")?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
+fn az_first_ten_tenant_ids(c: &mut Criterion) -> Result<(), BenchmarkError> {
+    let benchset = Benchset::new("rust_native::az_tenant::first_ten_tenant_ids", dataset::az_tenants())?
+        .measure_compilation_time()
+        .add_rust_native_targets("$[:10].tenantId")?
+        .finish();
+
+    benchset.run(c);
+
+    Ok(())
+}
+
 benchsets!(
     main_benches,
     ast_decl_inner,
     az_tenant_last,
     az_tenant_ids,
+    az_every_other_tenant,
+    az_first_ten_tenant_ids,
     twitter_metadata
 );
