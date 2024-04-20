@@ -1,5 +1,4 @@
 use crate::framework::implementation::Implementation;
-use ouroboros::self_referencing;
 use rsonpath::{
     engine::main::MainEngine,
     input::OwnedBytes,
@@ -9,7 +8,6 @@ use rsonpath::{
     engine::{Compiler, Engine},
     input::MmapInput,
 };
-use rsonpath_syntax::JsonPathQuery;
 use std::{convert::Infallible, fmt::Display, fs, io};
 use thiserror::Error;
 
@@ -18,12 +16,8 @@ pub struct RsonpathCount {}
 pub struct RsonpathMmap {}
 pub struct RsonpathMmapCount {}
 
-#[self_referencing()]
 pub struct RsonpathQuery {
-    query: JsonPathQuery,
-    #[borrows(query)]
-    #[not_covariant]
-    engine: MainEngine<'this>,
+    engine: MainEngine,
 }
 
 impl Implementation for Rsonpath {
@@ -51,19 +45,16 @@ impl Implementation for Rsonpath {
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
-        let query = rsonpath_syntax::parse(query).unwrap();
+        let query = rsonpath_syntax::parse(query)?;
+        let engine = MainEngine::compile_query(&query)?;
 
-        let rsonpath = RsonpathQuery::try_new(query, |query| {
-            MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
-        })?;
+        let rsonpath = RsonpathQuery { engine };
 
         Ok(rsonpath)
     }
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
-        query
-            .with_engine(|engine| engine.matches(file, &mut VoidSink))
-            .map_err(RsonpathError::EngineError)?;
+        query.engine.matches(file, &mut VoidSink)?;
 
         Ok("[not collected]")
     }
@@ -94,19 +85,16 @@ impl Implementation for RsonpathCount {
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
-        let query = rsonpath_syntax::parse(query).unwrap();
+        let query = rsonpath_syntax::parse(query)?;
+        let engine = MainEngine::compile_query(&query)?;
 
-        let rsonpath = RsonpathQuery::try_new(query, |query| {
-            MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
-        })?;
+        let rsonpath = RsonpathQuery { engine };
 
         Ok(rsonpath)
     }
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
-        query
-            .with_engine(|engine| engine.count(file))
-            .map_err(RsonpathError::EngineError)?;
+        query.engine.count(file)?;
 
         Ok("[not collected]")
     }
@@ -137,19 +125,16 @@ impl Implementation for RsonpathMmap {
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
-        let query = rsonpath_syntax::parse(query).unwrap();
+        let query = rsonpath_syntax::parse(query)?;
+        let engine = MainEngine::compile_query(&query)?;
 
-        let rsonpath = RsonpathQuery::try_new(query, |query| {
-            MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
-        })?;
+        let rsonpath = RsonpathQuery { engine };
 
         Ok(rsonpath)
     }
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
-        query
-            .with_engine(|engine| engine.matches(file, &mut VoidSink))
-            .map_err(RsonpathError::EngineError)?;
+        query.engine.matches(file, &mut VoidSink)?;
 
         Ok("[not collected]")
     }
@@ -180,19 +165,16 @@ impl Implementation for RsonpathMmapCount {
     }
 
     fn compile_query(&self, query: &str) -> Result<Self::Query, Self::Error> {
-        let query = rsonpath_syntax::parse(query).unwrap();
+        let query = rsonpath_syntax::parse(query)?;
+        let engine = MainEngine::compile_query(&query)?;
 
-        let rsonpath = RsonpathQuery::try_new(query, |query| {
-            MainEngine::compile_query(query).map_err(RsonpathError::CompilerError)
-        })?;
+        let rsonpath = RsonpathQuery { engine };
 
         Ok(rsonpath)
     }
 
     fn run(&self, query: &Self::Query, file: &Self::File) -> Result<Self::Result<'_>, Self::Error> {
-        query
-            .with_engine(|engine| engine.count(file))
-            .map_err(RsonpathError::EngineError)?;
+        query.engine.count(file)?;
 
         Ok("[not collected]")
     }
@@ -200,6 +182,8 @@ impl Implementation for RsonpathMmapCount {
 
 #[derive(Error, Debug)]
 pub enum RsonpathError {
+    #[error(transparent)]
+    ParseError(#[from] rsonpath_syntax::error::ParseError),
     #[error(transparent)]
     CompilerError(#[from] rsonpath::automaton::error::CompilerError),
     #[error(transparent)]
