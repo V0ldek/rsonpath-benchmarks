@@ -175,7 +175,7 @@ pub fn walmart_items_name(c: &mut Criterion) -> Result<(), BenchmarkError> {
             "rsonpath_direct_count",
         )?
         .add_target_with_id(
-            BenchTarget::Rsonpath("$..items_name", ResultType::Count),
+            BenchTarget::Rsonpath("$..items[*].name", ResultType::Count),
             "rsonpath_descendant_count",
         )?
         .add_target_with_id(
@@ -183,7 +183,7 @@ pub fn walmart_items_name(c: &mut Criterion) -> Result<(), BenchmarkError> {
             "rsonpath_direct_nodes",
         )?
         .add_target_with_id(
-            BenchTarget::Rsonpath("$..items_name", ResultType::Full),
+            BenchTarget::Rsonpath("$..items[*].name", ResultType::Full),
             "rsonpath_descendant_nodes",
         )?
         .finish();
